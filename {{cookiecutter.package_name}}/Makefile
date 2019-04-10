@@ -24,9 +24,18 @@ clean:
 	rm -rf .coverage
 	rm -rf .pytest_cache
 	rm -rf {{cookiecutter.package_name}}.egg-info
+	rm -rf dist
+	rm -rf build
 	find . -regex ".*__pycache__.*" -delete
 	find . -regex "*.py[co]" -delete
 
+.PHONY: install_build_requirements
+install_build_requirements:
+	pip3 install -e .[build]
+
+.PHONY: build
+build: install_build_requirements
+	python3 setup.py sdist bdist_wheel
 
 .PHONY: format
 format:

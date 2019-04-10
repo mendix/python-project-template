@@ -84,6 +84,10 @@ EXPECTED_CLEANED_UP_FILE_PARTS = (
     ".pyc",
     ".pyo",
     "__pycache__",
+    "build",
+    "dist",
+    ".tar.gz",
+    ".whl",
 )
 
 
@@ -97,9 +101,15 @@ def assert_expected_files_cleaned_up(result):
 def test_cleaning(cookies):
     with generate_temporary_project(cookies) as result:
         check_output_in_result_dir("make test", result)
+        check_output_in_result_dir("make build", result)
         check_output_in_result_dir("make clean", result)
 
         assert_expected_files_cleaned_up(result)
+
+
+def test_clean_can_be_executed_in_empty_project_dir(cookies):
+    with generate_temporary_project(cookies) as result:
+        check_output_in_result_dir("make clean", result)
 
 
 EXPECTED_FORMAT_OUTPUT = (
@@ -112,3 +122,17 @@ def test_formatting(cookies):
     with generate_temporary_project(cookies) as result:
         output = check_output_in_result_dir("make format", result)
         assert_expected_lines_are_in_output(EXPECTED_FORMAT_OUTPUT, output)
+
+
+EXPECTED_BUILD_PATTERNS = (
+    "./dist/*.tar.gz",
+    "./dist/*.whl",
+)
+
+
+def test_build(cookies):
+    with generate_temporary_project(cookies) as result:
+        check_output_in_result_dir("make build", result)
+        with inside_directory_of(result):
+            for pattern in EXPECTED_BUILD_PATTERNS:
+                assert glob.glob(pattern) != []

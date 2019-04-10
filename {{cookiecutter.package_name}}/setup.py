@@ -19,6 +19,7 @@ setup(
     packages=find_packages(),
     install_requires=[],
     extras_require={
+        "build": ["wheel<1"],
         "lint": ["flake8<4", "black<20"],
         "test": ["pytest<5", "pytest-cov<3"],
     },
