@@ -100,3 +100,15 @@ def test_cleaning(cookies):
         check_output_in_result_dir("make clean", result)
 
         assert_expected_files_cleaned_up(result)
+
+
+EXPECTED_FORMAT_OUTPUT = (
+    f"black --line-length=79 {DEFAULT_PROJECT_NAME} tests",
+    "files left unchanged",
+)
+
+
+def test_formatting(cookies):
+    with generate_temporary_project(cookies) as result:
+        output = check_output_in_result_dir("make format", result)
+        assert_expected_lines_are_in_output(EXPECTED_FORMAT_OUTPUT, output)

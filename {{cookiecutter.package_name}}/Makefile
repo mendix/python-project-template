@@ -26,3 +26,8 @@ clean:
 	rm -rf {{cookiecutter.package_name}}.egg-info
 	find . -regex ".*__pycache__.*" -delete
 	find . -regex "*.py[co]" -delete
+
+
+.PHONY: format
+format:
+	black --line-length=79 {{cookiecutter.package_name}} tests
