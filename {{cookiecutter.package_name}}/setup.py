@@ -18,5 +18,9 @@ setup(
     author_email="{{cookiecutter.author_email}}",
     packages=find_packages(),
     install_requires=[],
+    extras_require={
+        "lint": ["flake8<4", "black<20"],
+        "test": ["pytest<5", "pytest-cov<3"],
+    },
     zip_safe=False,
 )

@@ -9,7 +9,7 @@ with open(os.path.join(HERE, "README.md")) as fobj:
 
 
 setup(
-    name="python-project-template",
+    name="python_project_template",
     version="0.1.0",
     description="Template to generate Python projects with cookiecutter",
     long_description=README,

@@ -9,6 +9,9 @@ calling it as an external process, having to programatically complete the
 project generator wizard.
 """
 import contextlib
+import os
+import subprocess
+import shlex
 import shutil
 
 
@@ -31,6 +34,23 @@ def generate_temporary_project(cookies):
         shutil.rmtree(str(result.project))
 
 
+@contextlib.contextmanager
+def inside_directory_of(result):
+    try:
+        old_dir = result.project.chdir()
+        yield
+    finally:
+        os.chdir(old_dir)
+
+
+def check_output_in_result_directory(command, result):
+    with inside_directory_of(result):
+        output = subprocess.check_output(
+            shlex.split(command), stderr=subprocess.STDOUT
+        )
+    return str(output)
+
+
 def assert_project_creation_is_successful(result):
     assert result.project.isdir()
     assert result.exit_code == 0
@@ -47,3 +67,18 @@ def test_default_project_creation(cookies):
     with generate_temporary_project(cookies) as result:
         assert_project_creation_is_successful(result)
         assert_expected_files_are_created(result)
+
+
+EXPECTED_LINT_OUTPUT = (
+    "pip3 install -e .[lint]",
+    f"flake8 {DEFAULT_PROJECT_NAME} tests",
+    f"black --line-length=79 --check --diff {DEFAULT_PROJECT_NAME} tests",
+    "files would be left unchanged",
+)
+
+
+def test_linting(cookies):
+    with generate_temporary_project(cookies) as result:
+        output = check_output_in_result_directory("make lint", result)
+        for line in EXPECTED_LINT_OUTPUT:
+            assert line in output
