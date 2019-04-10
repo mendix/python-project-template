@@ -19,7 +19,17 @@ setup(
     packages=[],
     install_requires=["cookiecutter>=1.4<2"],
     extras_require={
-        'test': ['pytest<5', 'pytest-cookies<1', 'pytest-cov<3'],
+        "lint": [
+            "flake8<4",
+            "black<20",
+            "pylint<3",
+            "mypy<0.800"
+        ],
+        "test": [
+            "pytest<5",
+            "pytest-cookies<1",
+            "pytest-cov<3",
+        ],
     },
     zip_safe=False,
 )

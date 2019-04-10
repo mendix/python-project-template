@@ -11,7 +11,7 @@ project generator wizard.
 import glob
 
 from .util import (
-    check_output_in_result_directory,
+    check_output_in_result_dir,
     generate_temporary_project,
     inside_directory_of,
 )
@@ -27,13 +27,13 @@ EXPECTED_PROJECT_FILES = (
 )
 
 
-def assert_project_creation_is_successful(result):
+def assert_successful_creation(result):
     assert result.project.isdir()
     assert result.exit_code == 0
     assert result.exception is None
 
 
-def assert_expected_files_are_created(result):
+def assert_expected_files_exist(result):
     created_files = [f.basename for f in result.project.listdir()]
     for fname in EXPECTED_PROJECT_FILES:
         assert fname in created_files
@@ -41,8 +41,13 @@ def assert_expected_files_are_created(result):
 
 def test_default_project_creation(cookies):
     with generate_temporary_project(cookies) as result:
-        assert_project_creation_is_successful(result)
-        assert_expected_files_are_created(result)
+        assert_successful_creation(result)
+        assert_expected_files_exist(result)
+
+
+def assert_expected_lines_are_in_output(expected_lines, output):
+    for line in expected_lines:
+        assert line in output
 
 
 EXPECTED_LINT_OUTPUT = (
@@ -55,9 +60,8 @@ EXPECTED_LINT_OUTPUT = (
 
 def test_linting(cookies):
     with generate_temporary_project(cookies) as result:
-        output = check_output_in_result_directory("make lint", result)
-        for line in EXPECTED_LINT_OUTPUT:
-            assert line in output
+        output = check_output_in_result_dir("make lint", result)
+        assert_expected_lines_are_in_output(EXPECTED_LINT_OUTPUT, output)
 
 
 EXPECTED_TEST_OUTPUT = (
@@ -69,9 +73,8 @@ EXPECTED_TEST_OUTPUT = (
 
 def test_test_run(cookies):
     with generate_temporary_project(cookies) as result:
-        output = check_output_in_result_directory("make test", result)
-        for line in EXPECTED_TEST_OUTPUT:
-            assert line in output
+        output = check_output_in_result_dir("make test", result)
+        assert_expected_lines_are_in_output(EXPECTED_TEST_OUTPUT, output)
 
 
 EXPECTED_CLEANED_UP_FILE_PARTS = (
@@ -84,11 +87,16 @@ EXPECTED_CLEANED_UP_FILE_PARTS = (
 )
 
 
+def assert_expected_files_cleaned_up(result):
+    with inside_directory_of(result):
+        for cleaned_up in EXPECTED_CLEANED_UP_FILE_PARTS:
+            for filename in glob.glob("./**", recursive=True):
+                assert cleaned_up not in filename
+
+
 def test_cleaning(cookies):
     with generate_temporary_project(cookies) as result:
-        check_output_in_result_directory("make test", result)
-        check_output_in_result_directory("make clean", result)
-        with inside_directory_of(result):
-            for cleaned_up in EXPECTED_CLEANED_UP_FILE_PARTS:
-                for filename in glob.glob('./**', recursive=True):
-                    assert cleaned_up not in filename
+        check_output_in_result_dir("make test", result)
+        check_output_in_result_dir("make clean", result)
+
+        assert_expected_files_cleaned_up(result)

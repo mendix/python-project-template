@@ -3,10 +3,11 @@ import os
 import shlex
 import shutil
 import subprocess
+from typing import Any, Iterator
 
 
 @contextlib.contextmanager
-def generate_temporary_project(cookies):
+def generate_temporary_project(cookies: Any) -> Iterator[Any]:
     try:
         result = cookies.bake()
         yield result
@@ -15,7 +16,7 @@ def generate_temporary_project(cookies):
 
 
 @contextlib.contextmanager
-def inside_directory_of(result):
+def inside_directory_of(result: Any) -> Iterator[None]:
     try:
         old_dir = result.project.chdir()
         yield
@@ -23,7 +24,7 @@ def inside_directory_of(result):
         os.chdir(old_dir)
 
 
-def check_output_in_result_directory(command, result):
+def check_output_in_result_dir(command: str, result: Any) -> str:
     """Run the given command in the directory of `result`.
 
     The `command` parameter should be a string, while `result` is the
