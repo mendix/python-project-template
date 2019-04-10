@@ -20,7 +20,11 @@ setup(
     install_requires=[],
     extras_require={
         "build": ["wheel<1"],
-        "lint": ["flake8<4", "black<20"],
+        "lint": [
+            "flake8<4",
+            "black<20",
+            "pylint<3",
+        ],
         "test": ["pytest<5", "pytest-cov<3"],
     },
     zip_safe=False,

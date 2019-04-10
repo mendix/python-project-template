@@ -24,6 +24,7 @@ EXPECTED_PROJECT_FILES = (
     "README.md",
     "setup.py",
     "tests",
+    "pylintrc",
 )
 
 
@@ -55,6 +56,7 @@ EXPECTED_LINT_OUTPUT = (
     f"flake8 {DEFAULT_PROJECT_NAME} tests",
     f"black --line-length=79 --check --diff {DEFAULT_PROJECT_NAME} tests",
     "files would be left unchanged",
+    "Your code has been rated at 10.00/10",
 )
 
 
@@ -124,10 +126,7 @@ def test_formatting(cookies):
         assert_expected_lines_are_in_output(EXPECTED_FORMAT_OUTPUT, output)
 
 
-EXPECTED_BUILD_PATTERNS = (
-    "./dist/*.tar.gz",
-    "./dist/*.whl",
-)
+EXPECTED_BUILD_PATTERNS = ("./dist/*.tar.gz", "./dist/*.whl")
 
 
 def test_build(cookies):
