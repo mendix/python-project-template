@@ -1,0 +1,22 @@
+import os
+
+from setuptools import find_packages, setup
+
+
+HERE = os.path.abspath(os.path.dirname(__file__))
+with open(os.path.join(HERE, "README.md")) as fobj:
+    README = fobj.read()
+
+
+setup(
+    name="{{cookiecutter.package_name}}",
+    version="0.1.0",
+    description="{{cookiecutter.short_description}}",
+    long_description=README,
+    classifiers=[],
+    author="{{cookiecutter.author_name}}",
+    author_email="{{cookiecutter.author_email}}",
+    packages=find_packages(),
+    install_requires=[],
+    zip_safe=False,
+)

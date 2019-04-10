@@ -18,5 +18,8 @@ setup(
     author_email="devops@mendix.com",
     packages=[],
     install_requires=["cookiecutter>=1.4<2"],
+    extras_require={
+        'test': ['pytest<5', 'pytest-cookies<1', 'pytest-cov<3'],
+    },
     zip_safe=False,
 )
