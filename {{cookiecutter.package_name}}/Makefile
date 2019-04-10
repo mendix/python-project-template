@@ -19,3 +19,11 @@ test: install_test_requirements
 		--cov=tests \
 		--cov-report=term-missing:skip-covered \
 		tests
+
+.PHONY: clean
+clean:
+	rm -rf .coverage
+	rm -rf .pytest_cache
+	rm -rf {{cookiecutter.package_name}}.egg-info
+	find . -regex ".*__pycache__.*" -delete
+	find . -regex "*.py[co]" -delete

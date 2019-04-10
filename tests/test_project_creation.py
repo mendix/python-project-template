@@ -8,11 +8,7 @@ This plugin makes it a lot more convenient to invoke `cookiecutter` than
 calling it as an external process, having to programatically complete the
 project generator wizard.
 """
-import contextlib
-import os
-import subprocess
-import shlex
-import shutil
+import glob
 
 
 DEFAULT_PROJECT_NAME = "pymx"
@@ -104,3 +100,23 @@ def test_test_run(cookies):
         output = check_output_in_result_directory("make test", result)
         for line in EXPECTED_TEST_OUTPUT:
             assert line in output
+
+
+EXPECTED_CLEANED_UP_FILE_PARTS = (
+    ".coverage",
+    ".pytest_cache",
+    f"{DEFAULT_PROJECT_NAME}.egg-info",
+    ".pyc",
+    ".pyo",
+    "__pycache__",
+)
+
+
+def test_cleaning(cookies):
+    with generate_temporary_project(cookies) as result:
+        check_output_in_result_directory("make test", result)
+        check_output_in_result_directory("make clean", result)
+        with inside_directory_of(result):
+            for cleaned_up in EXPECTED_CLEANED_UP_FILE_PARTS:
+                for filename in glob.glob('./**', recursive=True):
+                    assert cleaned_up not in filename
