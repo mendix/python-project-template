@@ -13,7 +13,9 @@ setup(
     version="0.1.0",
     description="{{cookiecutter.short_description}}",
     long_description=README,
-    classifiers=[],
+    classifiers=[
+        "Programming Language :: Python :: 3",
+    ],
     author="{{cookiecutter.author_name}}",
     author_email="{{cookiecutter.author_email}}",
     packages=find_packages(),

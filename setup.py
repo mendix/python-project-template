@@ -13,7 +13,9 @@ setup(
     version="0.1.0",
     description="Template to generate Python projects with cookiecutter",
     long_description=README,
-    classifiers=[],
+    classifiers=[
+        "Programming Language :: Python :: 3",
+    ],
     author="Mendix Cloud Team",
     author_email="devops@mendix.com",
     packages=[],
