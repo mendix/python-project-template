@@ -23,7 +23,9 @@ setup(
         "lint": [
             "flake8<4",
             "black<20",
+	    {%- if cookiecutter.use_pylint == "y" %}
             "pylint<3",
+	    {%- endif%}
         ],
         "test": ["pytest<5", "pytest-cov<3"],
     },

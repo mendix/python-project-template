@@ -34,16 +34,40 @@ def assert_successful_creation(result):
     assert result.exception is None
 
 
-def assert_expected_files_exist(result):
+def assert_expected_files_exist(result, files=()):
     created_files = [f.basename for f in result.project.listdir()]
-    for fname in EXPECTED_PROJECT_FILES:
+    for fname in files:
         assert fname in created_files
 
 
 def test_default_project_creation(cookies):
     with generate_temporary_project(cookies) as result:
         assert_successful_creation(result)
-        assert_expected_files_exist(result)
+        assert_expected_files_exist(result, files=EXPECTED_PROJECT_FILES)
+
+
+def assert_expected_files_do_not_exist(result, files=()):
+    with inside_directory_of(result):
+        for cleaned_up in files:
+            for filename in glob.glob("./**", recursive=True):
+                assert cleaned_up not in filename
+
+
+EXPECTED_PROJECT_FILES_NO_PYLINT = tuple(
+    file_name
+    for file_name in EXPECTED_PROJECT_FILES
+    if file_name != "pylintrc"
+)
+NO_PLINT = {"use_pylint": "n"}
+
+
+def test_project_creation_without_pylint(cookies):
+    with generate_temporary_project(cookies, extra_context=NO_PLINT) as result:
+        assert_successful_creation(result)
+        assert_expected_files_exist(
+            result, files=EXPECTED_PROJECT_FILES_NO_PYLINT
+        )
+        assert_expected_files_do_not_exist(result, files=("pylintrc",))
 
 
 def assert_expected_lines_are_in_output(expected_lines, output):
@@ -51,12 +75,15 @@ def assert_expected_lines_are_in_output(expected_lines, output):
         assert line in output
 
 
+PYLINT_OUTPUT_1 = f"pylint {DEFAULT_PROJECT_NAME} tests"
+PYLINT_OUTPUT_2 = "Your code has been rated at 10.00/10"
 EXPECTED_LINT_OUTPUT = (
     "pip3 install -e .[lint]",
     f"flake8 {DEFAULT_PROJECT_NAME} tests",
     f"black --line-length=79 --check --diff {DEFAULT_PROJECT_NAME} tests",
     "files would be left unchanged",
-    "Your code has been rated at 10.00/10",
+    PYLINT_OUTPUT_1,
+    PYLINT_OUTPUT_2,
 )
 
 
@@ -64,6 +91,13 @@ def test_linting(cookies):
     with generate_temporary_project(cookies) as result:
         output = check_output_in_result_dir("make lint", result)
         assert_expected_lines_are_in_output(EXPECTED_LINT_OUTPUT, output)
+
+
+def test_linting_without_pylint(cookies):
+    with generate_temporary_project(cookies, extra_context=NO_PLINT) as result:
+        output = check_output_in_result_dir("make lint", result)
+        assert PYLINT_OUTPUT_1 not in output
+        assert PYLINT_OUTPUT_2 not in output
 
 
 EXPECTED_TEST_OUTPUT = (
@@ -93,20 +127,15 @@ EXPECTED_CLEANED_UP_FILE_PARTS = (
 )
 
 
-def assert_expected_files_cleaned_up(result):
-    with inside_directory_of(result):
-        for cleaned_up in EXPECTED_CLEANED_UP_FILE_PARTS:
-            for filename in glob.glob("./**", recursive=True):
-                assert cleaned_up not in filename
-
-
 def test_cleaning(cookies):
     with generate_temporary_project(cookies) as result:
         check_output_in_result_dir("make test", result)
         check_output_in_result_dir("make build", result)
         check_output_in_result_dir("make clean", result)
 
-        assert_expected_files_cleaned_up(result)
+        assert_expected_files_do_not_exist(
+            result, files=EXPECTED_CLEANED_UP_FILE_PARTS
+        )
 
 
 def test_clean_can_be_executed_in_empty_project_dir(cookies):

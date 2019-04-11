@@ -6,7 +6,9 @@ install_lint_requirements:
 lint: install_lint_requirements
 	flake8 {{cookiecutter.package_name}} tests
 	black --line-length=79 --check --diff {{cookiecutter.package_name}} tests
+	{%- if cookiecutter.use_pylint == "y" %}
 	pylint {{cookiecutter.package_name}} tests
+	{%- endif%}
 
 .PHONY: install_test_requirements
 install_test_requirements:

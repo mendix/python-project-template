@@ -7,9 +7,9 @@ from typing import Any, Iterator
 
 
 @contextlib.contextmanager
-def generate_temporary_project(cookies: Any) -> Iterator[Any]:
+def generate_temporary_project(cookies: Any, **kwargs: Any) -> Iterator[Any]:
     try:
-        result = cookies.bake()
+        result = cookies.bake(**kwargs)
         yield result
     finally:
         shutil.rmtree(str(result.project))
