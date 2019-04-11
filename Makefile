@@ -29,3 +29,13 @@ clean:
 .PHONY: format
 format:
 	black --line-length=79 tests
+
+.PHONY: install
+install:
+	pip install .
+
+TARGET_DIR := .
+
+.PHONY: generate
+generate: install
+	cookiecutter -v . --output-dir="$(TARGET_DIR)"
