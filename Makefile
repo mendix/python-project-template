@@ -15,7 +15,7 @@ install_test_requirements:
 
 .PHONY: test
 test: install_test_requirements
-	pytest -s tests
+	pytest tests
 
 .PHONY: clean
 clean:
