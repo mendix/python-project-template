@@ -46,6 +46,11 @@ def test_default_project_creation(cookies):
         assert_expected_files_exist(result, files=EXPECTED_PROJECT_FILES)
 
 
+def test_project_creation_with_invalid_name_fails(cookies):
+    result = cookies.bake(extra_context={"package_name": "Foo-Bar"})
+    assert result.exit_code != 0
+
+
 def assert_expected_files_do_not_exist(result, files=()):
     with inside_directory_of(result):
         for cleaned_up in files:
