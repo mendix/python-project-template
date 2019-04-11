@@ -2,6 +2,8 @@ import os
 
 from setuptools import find_packages, setup
 
+from {{cookiecutter.package_name}}.metadata import __version__
+
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(HERE, "README.md")) as fobj:
@@ -10,7 +12,7 @@ with open(os.path.join(HERE, "README.md")) as fobj:
 
 setup(
     name="{{cookiecutter.package_name}}",
-    version="0.1.0",
+    version=__version__,
     description="{{cookiecutter.short_description}}",
     long_description=README,
     classifiers=[
