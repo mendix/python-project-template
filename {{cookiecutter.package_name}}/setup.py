@@ -26,6 +26,9 @@ setup(
 	    {%- if cookiecutter.use_pylint == "y" %}
             "pylint<3",
 	    {%- endif%}
+	    {%- if cookiecutter.use_mypy == "y" %}
+            "mypy<0.800",
+	    {%- endif%}
         ],
         "test": ["pytest<5", "pytest-cov<3"],
     },

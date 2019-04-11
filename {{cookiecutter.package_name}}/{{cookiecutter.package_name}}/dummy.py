@@ -1,2 +1,2 @@
-def dummy():
+def dummy() -> None:
     pass

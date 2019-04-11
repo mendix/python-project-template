@@ -3,5 +3,6 @@
     "short_description": "Python project",
     "author_name": "Mendix Cloud Team",
     "author_email": "devops@mendix.com",
-    "use_pylint": "y"
+    "use_pylint": "y",
+    "use_mypy": "y"
 }

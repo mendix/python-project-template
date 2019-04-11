@@ -3,7 +3,7 @@
 This test module makes use of `pytest` fixtures and the `pytest-cookies`
 fixture plugin (https://github.com/hackebrot/pytest-cookies). Therefore if
 you encounter a `cookies` parameter in a test-function fear not, it is a
-`cookiecutter` test fixture, injected by `pylint`.
+`cookiecutter` test fixture, injected by `pytest`.
 This plugin makes it a lot more convenient to invoke `cookiecutter` than
 calling it as an external process, having to programatically complete the
 project generator wizard.
@@ -77,6 +77,7 @@ def assert_expected_lines_are_in_output(expected_lines, output):
 
 PYLINT_OUTPUT_1 = f"pylint {DEFAULT_PROJECT_NAME} tests"
 PYLINT_OUTPUT_2 = "Your code has been rated at 10.00/10"
+MYPY_OUTPUT = f"mypy {DEFAULT_PROJECT_NAME}"
 EXPECTED_LINT_OUTPUT = (
     "pip3 install -e .[lint]",
     f"flake8 {DEFAULT_PROJECT_NAME} tests",
@@ -84,6 +85,7 @@ EXPECTED_LINT_OUTPUT = (
     "files would be left unchanged",
     PYLINT_OUTPUT_1,
     PYLINT_OUTPUT_2,
+    MYPY_OUTPUT,
 )
 
 
@@ -98,6 +100,15 @@ def test_linting_without_pylint(cookies):
         output = check_output_in_result_dir("make lint", result)
         assert PYLINT_OUTPUT_1 not in output
         assert PYLINT_OUTPUT_2 not in output
+
+
+NO_MYPY = {"use_mypy": "n"}
+
+
+def test_linting_without_mypy(cookies):
+    with generate_temporary_project(cookies, extra_context=NO_MYPY) as result:
+        output = check_output_in_result_dir("make lint", result)
+        assert MYPY_OUTPUT not in output
 
 
 EXPECTED_TEST_OUTPUT = (
@@ -116,6 +127,7 @@ def test_test_run(cookies):
 EXPECTED_CLEANED_UP_FILE_PARTS = (
     ".coverage",
     ".pytest_cache",
+    ".mypy_cache",
     f"{DEFAULT_PROJECT_NAME}.egg-info",
     ".pyc",
     ".pyo",
@@ -129,6 +141,7 @@ EXPECTED_CLEANED_UP_FILE_PARTS = (
 
 def test_cleaning(cookies):
     with generate_temporary_project(cookies) as result:
+        check_output_in_result_dir("make lint", result)
         check_output_in_result_dir("make test", result)
         check_output_in_result_dir("make build", result)
         check_output_in_result_dir("make clean", result)

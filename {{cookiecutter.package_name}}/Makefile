@@ -9,6 +9,9 @@ lint: install_lint_requirements
 	{%- if cookiecutter.use_pylint == "y" %}
 	pylint {{cookiecutter.package_name}} tests
 	{%- endif%}
+	{%- if cookiecutter.use_mypy == "y" %}
+	mypy {{cookiecutter.package_name}}
+	{%- endif%}
 
 .PHONY: install_test_requirements
 install_test_requirements:
@@ -26,6 +29,7 @@ test: install_test_requirements
 clean:
 	rm -rf .coverage
 	rm -rf .pytest_cache
+	rm -rf .mypy_cache
 	rm -rf {{cookiecutter.package_name}}.egg-info
 	rm -rf dist
 	rm -rf build
