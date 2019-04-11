@@ -21,7 +21,7 @@ setup(
     extras_require={
         "lint": [
             "flake8<4",
-            "black<20",
+            "black==19.3b0",
             "pylint<3",
             "mypy<0.800"
         ],

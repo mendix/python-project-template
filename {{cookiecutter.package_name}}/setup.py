@@ -22,7 +22,7 @@ setup(
         "build": ["wheel<1"],
         "lint": [
             "flake8<4",
-            "black<20",
+            "black==19.3b0",
 	    {%- if cookiecutter.use_pylint == "y" %}
             "pylint<3",
 	    {%- endif%}
