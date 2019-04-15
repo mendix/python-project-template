@@ -16,8 +16,8 @@ setup(
     classifiers=[
         "Programming Language :: Python :: 3",
     ],
-    author="Mendix Cloud Team",
-    author_email="devops@mendix.com",
+    author="Mendix Cloud Value Added Services Team",
+    author_email="dis_valueaddedservices@mendix.com",
     packages=[],
     install_requires=["cookiecutter>=1.4<2"],
     extras_require={
