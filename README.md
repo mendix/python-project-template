@@ -133,3 +133,9 @@ application is able to handle load according to requirements
 * Security (`security` target), to run some automated security tooling
 (eg. Snyk) to reveal potential vurnelabilities in the application code itself
 or introduced by dependencies
+
+In addition to this we could introduce automated documentation generation in
+the created project, using [Sphinx](http://www.sphinx-doc.org/en/master/) via
+a `make docs` target. For this we will need some storage to be able to host the
+generated docs and push to it from Python projects upon a successful master
+build.
