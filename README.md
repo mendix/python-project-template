@@ -131,8 +131,8 @@ functional and non-functional requirements, potentially in a BDD style
 * Capacity tests (`test-capacity` target) - automatically verifying that an
 application is able to handle load according to requirements
 * Security (`security` target), to run some automated security tooling
-(eg. Snyk) to reveal potential vurnelabilities in the application code itself
-or introduced by dependencies
+(eg. Snyk or BlackDuck) to reveal potential vurnelabilities in the application
+code itself or introduced by dependencies
 
 In addition to this we could introduce automated documentation generation in
 the created project, using [Sphinx](http://www.sphinx-doc.org/en/master/) via
