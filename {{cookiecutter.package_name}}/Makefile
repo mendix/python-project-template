@@ -31,6 +31,7 @@ clean:
 	rm -rf .pytest_cache
 	rm -rf .mypy_cache
 	rm -rf {{cookiecutter.package_name}}.egg-info
+	rm -rf pip-wheel-metadata
 	rm -rf dist
 	rm -rf build
 	find . -regex ".*__pycache__.*" -delete

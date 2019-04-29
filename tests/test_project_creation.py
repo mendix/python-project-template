@@ -134,6 +134,7 @@ EXPECTED_CLEANED_UP_FILE_PARTS = (
     ".pytest_cache",
     ".mypy_cache",
     f"{DEFAULT_PROJECT_NAME}.egg-info",
+    "pip-wheel-metadata",
     ".pyc",
     ".pyo",
     "__pycache__",
