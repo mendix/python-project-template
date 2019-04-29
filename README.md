@@ -3,7 +3,7 @@
 A [`cookiecutter`](https://github.com/audreyr/cookiecutter) based Python
 project template.
 
-## Usage
+## Usage - new project
 
 In the below sections it is explained how to generate a new Python package with
 this project. When generating a new package, the tool will request a series of
@@ -44,6 +44,61 @@ with `git remote add origin <repository URL>`
 * Or if you have the empty repository already cloned on your machine, copy the
 generated files to the cloned local repository
 * Then all you have to do is push
+
+## Usage - existing project
+
+Since many times we want to improve existing projects instead of generating a
+new one, this tool can also be used to do so, with some extra manual steps
+along the way.
+
+So in case you wish to migrate an existing Python project to comply with this
+template, do the following steps
+
+1. Clone the existing repository
+2. Make sure you are able to use this project on your machine (see the usage
+for a new project above: clone/install cookiecutter)
+3. Generate a new empty project, with the same name as your existing one
+(this is an important step, since later you don't want to manually modify the
+``Makefile`` and ``setup.py`` too much)
+4. From the generated project, move the following files, as-is to your existing
+local repository
+    * ``.gitignore`` (just to be sure, diff it in case your project contains
+    more ignored patterns than the new one)
+    * ``Makefile``
+    * ``pylintrc`` (if applicable)
+    * ``tests`` (if it doesn't exist yet)
+5. Rename the existing ``setup.py`` to ``setup.py.bak``
+6. Move the generated ``setup.py`` to the existing local repository
+7. Merge ``setup.py.bak`` into ``setup.py``
+    * Move entry points
+    * Change description if needed
+    * Adjust the `packages` parameter of the `setup(...)` call if needed,
+    although `find_packages()` should suffice in 99% of cases
+    * Update the `install_requires` parameter with the requirements of the
+    existing package
+    * Create a ``metadata.py`` within the new project's main Python package and
+    make sure the version is correct (`VERSION` and `__version__` parameters)
+    * Make sure you don't lose any extras that are in the setup file, such as
+    extra package data, reference to ``MANIFEST.in``, etc.
+8. Remove ``setup.py.bak``
+9. Remove ``tests/test_dummy.py`` and make there is at least one test to be run
+10. Do a sanity check on the make targets
+    * format
+    * lint
+    * test
+    * build
+    * clean
+11. Make sure tests and linting are green - it could be that making linting
+pass requires a bit of manual work in the code
+    * `flake8`, `pylint`, `black` errors should be easy to fix or explicitly
+    ignore (note that `pylint` errors/warnings that cannot be immediately fixed
+    are usually caused by some deeper design smell in the code, maybe just
+    ignore these at first and come back to fixing them later)
+    * `mypy` can break if some dependencies are not implementing type hinting
+    in this case check out the
+    [documentation](https://mypy.readthedocs.io/en/latest/running_mypy.html#missing-imports)
+    to explicitly ignore import problems related to this
+12. Remove the newly generated project
 
 ## About the contents of this repository
 
