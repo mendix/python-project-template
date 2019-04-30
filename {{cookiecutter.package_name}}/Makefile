@@ -1,16 +1,18 @@
+PACKAGE_NAME := {{cookiecutter.package_name}}
+
 .PHONY: install_lint_requirements
 install_lint_requirements:
 	pip3 install -e .[lint]
 
 .PHONY: lint
 lint: install_lint_requirements
-	flake8 {{cookiecutter.package_name}} tests
-	black --line-length=79 --check --diff {{cookiecutter.package_name}} tests
+	flake8 $(PACKAGE_NAME) tests
+	black --line-length=79 --check --diff $(PACKAGE_NAME) tests
 	{%- if cookiecutter.use_pylint == "y" %}
-	pylint {{cookiecutter.package_name}} tests
+	pylint $(PACKAGE_NAME) tests
 	{%- endif%}
 	{%- if cookiecutter.use_mypy == "y" %}
-	mypy {{cookiecutter.package_name}}
+	mypy $(PACKAGE_NAME)
 	{%- endif%}
 
 .PHONY: install_test_requirements
@@ -20,7 +22,7 @@ install_test_requirements:
 .PHONY: test
 test: install_test_requirements
 	pytest \
-		--cov={{cookiecutter.package_name}} \
+		--cov=$(PACKAGE_NAME) \
 		--cov=tests \
 		--cov-report=term-missing:skip-covered \
 		tests
@@ -30,7 +32,7 @@ clean:
 	rm -rf .coverage
 	rm -rf .pytest_cache
 	rm -rf .mypy_cache
-	rm -rf {{cookiecutter.package_name}}.egg-info
+	rm -rf $(PACKAGE_NAME).egg-info
 	rm -rf pip-wheel-metadata
 	rm -rf dist
 	rm -rf build
@@ -47,4 +49,4 @@ build: install_build_requirements
 
 .PHONY: format
 format:
-	black --line-length=79 {{cookiecutter.package_name}} tests
+	black --line-length=79 $(PACKAGE_NAME) tests
