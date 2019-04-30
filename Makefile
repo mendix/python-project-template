@@ -23,6 +23,7 @@ clean:
 	rm -rf .pytest_cache
 	rm -rf .mypy_cache
 	rm -rf python_project_template.egg-info
+	rm -rf pip-wheel-metadata
 	find . -regex ".*__pycache__.*" -delete
 	find . -regex "*.py[co]" -delete
 

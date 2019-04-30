@@ -19,3 +19,9 @@ reports = yes
 
 [FORMAT]
 max-line-length = 79
+
+[SIMILARITIES]
+min-similarity-lines=6
+ignore-comments=yes
+ignore-docstrings=yes
+ignore-imports=yes
