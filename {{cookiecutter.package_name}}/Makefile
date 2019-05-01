@@ -7,7 +7,7 @@ install_lint_requirements:
 .PHONY: lint
 lint: install_lint_requirements
 	flake8 $(PACKAGE_NAME) tests
-	black --line-length=79 --check --diff $(PACKAGE_NAME) tests
+	black --line-length=79 --check --diff $(PACKAGE_NAME) tests setup.py
 	{%- if cookiecutter.use_pylint == "y" %}
 	pylint $(PACKAGE_NAME) tests
 	{%- endif%}
@@ -49,4 +49,4 @@ build: install_build_requirements
 
 .PHONY: format
 format:
-	black --line-length=79 $(PACKAGE_NAME) tests
+	black --line-length=79 $(PACKAGE_NAME) tests setup.py

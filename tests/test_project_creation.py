@@ -80,14 +80,16 @@ def assert_expected_lines_are_in_output(expected_lines, output):
         assert line in output
 
 
+FILES_TO_CHECK_FORMAT = f"{DEFAULT_PROJECT_NAME} tests setup.py"
+BLACK_OUTPUT = f"black --line-length=79 --check --diff {FILES_TO_CHECK_FORMAT}"
 PYLINT_OUTPUT_1 = f"pylint {DEFAULT_PROJECT_NAME} tests"
 PYLINT_OUTPUT_2 = "Your code has been rated at 10.00/10"
 MYPY_OUTPUT = f"mypy {DEFAULT_PROJECT_NAME}"
 EXPECTED_LINT_OUTPUT = (
     "pip3 install -e .[lint]",
     f"flake8 {DEFAULT_PROJECT_NAME} tests",
-    f"black --line-length=79 --check --diff {DEFAULT_PROJECT_NAME} tests",
     "files would be left unchanged",
+    BLACK_OUTPUT,
     PYLINT_OUTPUT_1,
     PYLINT_OUTPUT_2,
     MYPY_OUTPUT,
@@ -163,7 +165,7 @@ def test_clean_can_be_executed_in_empty_project_dir(cookies):
 
 
 EXPECTED_FORMAT_OUTPUT = (
-    f"black --line-length=79 {DEFAULT_PROJECT_NAME} tests",
+    f"black --line-length=79 {DEFAULT_PROJECT_NAME} tests setup.py",
     "files left unchanged",
 )
 
