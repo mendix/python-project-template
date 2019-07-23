@@ -12,7 +12,7 @@ lint: install_lint_requirements
 	pylint $(PACKAGE_NAME) tests
 	{%- endif%}
 	{%- if cookiecutter.use_mypy == "y" %}
-	mypy $(PACKAGE_NAME)
+	mypy --ignore-missing-imports $(PACKAGE_NAME)
 	{%- endif%}
 
 .PHONY: install_test_requirements
