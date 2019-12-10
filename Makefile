@@ -33,7 +33,7 @@ format:
 
 .PHONY: install
 install:
-	pip install .
+	pip3 install .
 
 TARGET_DIR := .
 
