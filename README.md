@@ -3,6 +3,18 @@
 A [`cookiecutter`](https://github.com/audreyr/cookiecutter) based Python
 project template.
 
+This is an opinionated template, based on useful defaults that we like to have
+when creating new projects. We include a pre-built makefile, with rules for
+linting and test, scaffolded unit tests, and tools for building wheels,
+amongst other things. 
+
+This project is open source because we think it might be useful to other
+engineers. However, Mendix does not officially support this project.
+
+## License
+
+This project is licensed under the MIT license.
+
 ## Usage - new project
 
 In the below sections it is explained how to generate a new Python package with
