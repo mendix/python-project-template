@@ -19,11 +19,9 @@ def generate_temporary_project(
 
 @contextlib.contextmanager
 def inside_directory_of(result: Any) -> Iterator[None]:
-    try:
-        old_dir = result.project.chdir()
-        yield
-    finally:
-        os.chdir(old_dir)
+    old_dir = result.project.chdir()
+    yield
+    os.chdir(old_dir)
 
 
 def check_output_in_result_dir(command: str, result: Any) -> str:

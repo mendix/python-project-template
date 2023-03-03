@@ -22,15 +22,15 @@ setup(
     install_requires=["cookiecutter>=1.4<2"],
     extras_require={
         "lint": [
-            "flake8<4",
-            "black==19.3b0",
+            "flake8<7",
+            "black<24",
             "pylint<3",
-            "mypy<0.800"
+            "mypy<2"
         ],
         "test": [
-            "pytest<5",
+            "pytest<8",
             "pytest-cookies<1",
-            "pytest-cov<3",
+            "pytest-cov<5",
         ],
     },
     zip_safe=False,

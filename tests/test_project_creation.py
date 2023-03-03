@@ -184,4 +184,4 @@ def test_build(cookies):
         check_output_in_result_dir("make build", result)
         with inside_directory_of(result):
             for pattern in EXPECTED_BUILD_PATTERNS:
-                assert glob.glob(pattern) != []
+                assert glob.glob(pattern)
