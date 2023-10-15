@@ -84,7 +84,7 @@ BLACK_OUTPUT = f"black --line-length=79 --check --diff {FILES_TO_CHECK_FORMAT}"
 PYLINT_OUTPUT_1 = f"pylint {DEFAULT_PROJECT_NAME} tests"
 PYLINT_OUTPUT_2 = "Your code has been rated at 10.00/10"
 ISORT_OUTPUT = f"isort --check-only {DEFAULT_PROJECT_NAME} tests setup.py"
-MYPY_OUTPUT = f"mypy --ignore-missing-imports {DEFAULT_PROJECT_NAME}"
+MYPY_OUTPUT = f"mypy --ignore-missing-imports {DEFAULT_PROJECT_NAME} tests"
 EXPECTED_LINT_OUTPUT = (
     "pip3 install -e .[lint]",
     f"flake8 {DEFAULT_PROJECT_NAME} tests",

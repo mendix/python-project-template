@@ -12,7 +12,7 @@ lint: install_lint_requirements
 	pylint $(PACKAGE_NAME) tests
 	{%- endif%}
 	isort --check-only $(PACKAGE_NAME) tests setup.py
-	mypy --ignore-missing-imports $(PACKAGE_NAME)
+	mypy --ignore-missing-imports $(PACKAGE_NAME) tests
 
 .PHONY: install_test_requirements
 install_test_requirements:
