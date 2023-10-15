@@ -9,6 +9,9 @@ calling it as an external process, having to programatically complete the
 project generator wizard.
 """
 import glob
+from collections.abc import Sequence
+
+from pytest_cookies.plugin import Cookies, Result
 
 from .util import (
     check_output_in_result_dir,
@@ -27,30 +30,32 @@ EXPECTED_PROJECT_FILES = (
 )
 
 
-def assert_successful_creation(result):
+def assert_successful_creation(result: Result) -> None:
     assert result.project.isdir()
     assert result.exit_code == 0
     assert result.exception is None
 
 
-def assert_expected_files_exist(result, files=()):
+def assert_expected_files_exist(result: Result, files: Sequence[str]) -> None:
     created_files = [f.basename for f in result.project.listdir()]
     for fname in files:
         assert fname in created_files
 
 
-def test_default_project_creation(cookies):
+def test_default_project_creation(cookies: Cookies) -> None:
     with generate_temporary_project(cookies) as result:
         assert_successful_creation(result)
         assert_expected_files_exist(result, files=EXPECTED_PROJECT_FILES)
 
 
-def test_project_creation_with_invalid_name_fails(cookies):
+def test_project_creation_with_invalid_name_fails(cookies: Cookies) -> None:
     result = cookies.bake(extra_context={"package_name": "Foo-Bar"})
     assert result.exit_code != 0
 
 
-def assert_expected_files_do_not_exist(result, files=()):
+def assert_expected_files_do_not_exist(
+    result: Result, files: Sequence[str]
+) -> None:
     with inside_directory_of(result):
         for cleaned_up in files:
             for filename in glob.glob("./**", recursive=True):
@@ -65,7 +70,7 @@ EXPECTED_PROJECT_FILES_NO_PYLINT = tuple(
 NO_PLINT = {"use_pylint": "n"}
 
 
-def test_project_creation_without_pylint(cookies):
+def test_project_creation_without_pylint(cookies: Cookies) -> None:
     with generate_temporary_project(cookies, extra_context=NO_PLINT) as result:
         assert_successful_creation(result)
         assert_expected_files_exist(
@@ -74,7 +79,10 @@ def test_project_creation_without_pylint(cookies):
         assert_expected_files_do_not_exist(result, files=("pylintrc",))
 
 
-def assert_expected_lines_are_in_output(expected_lines, output):
+def assert_expected_lines_are_in_output(
+    expected_lines: Sequence[str],
+    output: str,
+) -> None:
     for line in expected_lines:
         assert line in output
 
@@ -97,13 +105,13 @@ EXPECTED_LINT_OUTPUT = (
 )
 
 
-def test_linting(cookies):
+def test_linting(cookies: Cookies) -> None:
     with generate_temporary_project(cookies) as result:
         output = check_output_in_result_dir("make lint", result)
         assert_expected_lines_are_in_output(EXPECTED_LINT_OUTPUT, output)
 
 
-def test_linting_without_pylint(cookies):
+def test_linting_without_pylint(cookies: Cookies) -> None:
     with generate_temporary_project(cookies, extra_context=NO_PLINT) as result:
         output = check_output_in_result_dir("make lint", result)
         assert PYLINT_OUTPUT_1 not in output
@@ -117,7 +125,7 @@ EXPECTED_TEST_OUTPUT = (
 )
 
 
-def test_test_run(cookies):
+def test_test_run(cookies: Cookies) -> None:
     with generate_temporary_project(cookies) as result:
         output = check_output_in_result_dir("make test", result)
         assert_expected_lines_are_in_output(EXPECTED_TEST_OUTPUT, output)
@@ -139,7 +147,7 @@ EXPECTED_CLEANED_UP_FILE_PARTS = (
 )
 
 
-def test_cleaning(cookies):
+def test_cleaning(cookies: Cookies) -> None:
     with generate_temporary_project(cookies) as result:
         check_output_in_result_dir("make lint", result)
         check_output_in_result_dir("make test", result)
@@ -151,7 +159,7 @@ def test_cleaning(cookies):
         )
 
 
-def test_clean_can_be_executed_in_empty_project_dir(cookies):
+def test_clean_can_be_executed_in_empty_project_dir(cookies: Cookies) -> None:
     with generate_temporary_project(cookies) as result:
         check_output_in_result_dir("make clean", result)
 
@@ -163,7 +171,7 @@ EXPECTED_FORMAT_OUTPUT = (
 )
 
 
-def test_formatting(cookies):
+def test_formatting(cookies: Cookies) -> None:
     with generate_temporary_project(cookies) as result:
         output = check_output_in_result_dir("make format", result)
         assert_expected_lines_are_in_output(EXPECTED_FORMAT_OUTPUT, output)
@@ -172,7 +180,7 @@ def test_formatting(cookies):
 EXPECTED_BUILD_PATTERNS = ("./dist/*.tar.gz", "./dist/*.whl")
 
 
-def test_build(cookies):
+def test_build(cookies: Cookies) -> None:
     with generate_temporary_project(cookies) as result:
         check_output_in_result_dir("make build", result)
         with inside_directory_of(result):

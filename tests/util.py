@@ -3,13 +3,15 @@ import os
 import shlex
 import shutil
 import subprocess
-from typing import Any, Iterator, Mapping
+from typing import Any, Iterator
+
+from pytest_cookies.plugin import Cookies, Result
 
 
 @contextlib.contextmanager
 def generate_temporary_project(
-    cookies: Any, **kwargs: Mapping[Any, Any]
-) -> Iterator[Any]:
+    cookies: Cookies, **kwargs: dict[Any, Any]
+) -> Iterator[Cookies]:
     try:
         result = cookies.bake(**kwargs)
         yield result
@@ -18,13 +20,13 @@ def generate_temporary_project(
 
 
 @contextlib.contextmanager
-def inside_directory_of(result: Any) -> Iterator[None]:
+def inside_directory_of(result: Result) -> Iterator[None]:
     old_dir = result.project.chdir()
     yield
     os.chdir(old_dir)
 
 
-def check_output_in_result_dir(command: str, result: Any) -> str:
+def check_output_in_result_dir(command: str, result: Result) -> str:
     """Run the given command in the directory of `result`.
 
     The `command` parameter should be a string, while `result` is the
