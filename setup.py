@@ -19,7 +19,7 @@ setup(
     author="Mendix Cloud Value Added Services Team",
     author_email="dis_valueaddedservices@mendix.com",
     packages=[],
-    install_requires=["cookiecutter>=1.4<2"],
+    install_requires=["cookiecutter<2"],
     extras_require={
         "lint": [
             "flake8<7",
