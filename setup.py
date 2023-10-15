@@ -26,7 +26,7 @@ setup(
         "lint": [
             "flake8<7",
             "black<24",
-            "pylint<3",
+            "pylint<4",
             "mypy<2"
         ],
         "test": [
