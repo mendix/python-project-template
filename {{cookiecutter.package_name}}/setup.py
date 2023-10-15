@@ -14,7 +14,11 @@ setup(
     version=__version__,
     description="{{cookiecutter.short_description}}",
     long_description=README,
-    classifiers=["Programming Language :: Python :: 3"],
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "Framework :: Pytest",
+        "Typing :: Typed",
+    ],
     author="{{cookiecutter.author_name}}",
     author_email="{{cookiecutter.author_email}}",
     packages=find_packages(),
