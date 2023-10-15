@@ -13,7 +13,11 @@ setup(
     description="Template to generate Python projects with cookiecutter",
     long_description=README,
     classifiers=[
-        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Framework :: Pytest",
+        "Typing :: Typed",
     ],
     author="Mendix Cloud Value Added Services Team",
     author_email="dis_valueaddedservices@mendix.com",
