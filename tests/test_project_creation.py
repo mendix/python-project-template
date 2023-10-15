@@ -110,15 +110,6 @@ def test_linting_without_pylint(cookies):
         assert PYLINT_OUTPUT_2 not in output
 
 
-NO_MYPY = {"use_mypy": "n"}
-
-
-def test_linting_without_mypy(cookies):
-    with generate_temporary_project(cookies, extra_context=NO_MYPY) as result:
-        output = check_output_in_result_dir("make lint", result)
-        assert MYPY_OUTPUT not in output
-
-
 EXPECTED_TEST_OUTPUT = (
     "pip3 install -e .[test]",
     "test session starts",

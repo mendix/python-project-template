@@ -160,9 +160,7 @@ Below are the main `make` targets and the tools used within:
     customizable; the generated project contains a minimal, but decent
     `pylintrc` configuration file; its usage is optional, can be decided upon
     project generation, however highly recommended and turned on by default
-    * `mypy` - type checker, the de facto standard at the moment; its usage is
-    optional, can be decided upon project generation, however highly
-    recommended and turned on by default
+    * `mypy` - type checker, the de facto standard at the moment
 * `format` - to easily comply with the above standards at the push of a button
     * `black` - because of the reasons mentioned above
 * `test` - to verify functionality at the smallest level of granularity (unit)
@@ -185,7 +183,7 @@ are called automatically in their related main target._
 ### Future extension
 
 New linters can be easily added by extending the `Makefile`, potentially made
-optional (just as with `pylint` or `mypy`).
+optional (just as with `pylint`).
 
 Currently in the created project there is only one `test` target which is
 intendet to be used to run a set of automated tests in the "commit phase".

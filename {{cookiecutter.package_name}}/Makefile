@@ -12,9 +12,7 @@ lint: install_lint_requirements
 	pylint $(PACKAGE_NAME) tests
 	{%- endif%}
 	isort --check-only $(PACKAGE_NAME) tests setup.py
-	{%- if cookiecutter.use_mypy == "y" %}
 	mypy --ignore-missing-imports $(PACKAGE_NAME)
-	{%- endif%}
 
 .PHONY: install_test_requirements
 install_test_requirements:
