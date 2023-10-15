@@ -2,7 +2,6 @@ import os
 
 from setuptools import setup
 
-
 HERE = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(HERE, "README.md")) as fobj:
     README = fobj.read()
