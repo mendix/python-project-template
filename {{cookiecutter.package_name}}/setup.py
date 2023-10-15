@@ -25,7 +25,7 @@ setup(
     install_requires=[],
     extras_require={
         "build": ["wheel<1"],
-        "lint": ["flake8<7", "black<24"{%- if cookiecutter.use_pylint == "y" %}, "pylint<3"{%- endif%}, "mypy<2"],
+        "lint": ["flake8<7", "black<24"{%- if cookiecutter.use_pylint == "y" %}, "pylint<4"{%- endif%}, "mypy<2"],
         "test": ["pytest<8", "pytest-cov<5"],
     },
     zip_safe=False,
