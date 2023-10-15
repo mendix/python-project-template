@@ -27,6 +27,8 @@ EXPECTED_PROJECT_FILES = (
     "setup.py",
     "tests",
     "pylintrc",
+    ".isort.cfg",
+    "mypy.ini",
 )
 
 
