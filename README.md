@@ -1,5 +1,8 @@
 # python-project-template
 
+![Test status](https://github.com/matyaskuti/python-project-template/actions/workflows/python-app.yml/badge.svg
+)
+
 A [`cookiecutter`](https://github.com/audreyr/cookiecutter) based Python
 project template.
 
