@@ -1,18 +1,18 @@
 .PHONY: install_lint_requirements
 install_lint_requirements:
-	pip3 install -e .[lint]
+	poetry install --with lint
 
 .PHONY: lint
 lint: install_lint_requirements
 	flake8 tests
 	black --line-length=79 --check --diff tests
 	pylint tests
-	isort --check-only tests setup.py
+	isort --check-only tests
 	mypy tests
 
 .PHONY: install_test_requirements
 install_test_requirements:
-	pip3 install -e .[test]
+	poetry install --with test
 
 .PHONY: test
 test: install_test_requirements
@@ -31,7 +31,7 @@ clean:
 .PHONY: format
 format:
 	black --line-length=79 tests
-	isort tests setup.py
+	isort tests
 
 .PHONY: install
 install:

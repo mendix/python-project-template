@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "python_project_template"
+version = "0.1.0"
+description = "Template to generate Python projects with cookiecutter"
+readme = "README.md"
+repository = "https://github.com/mendix/python-project-template"
+classifiers = [
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Framework :: Pytest",
+    "Typing :: Typed",
+]
+authors = ["Mendix Cloud Value Added Services Team <dis_valueaddedservices@mendix.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+cookiecutter = "^2"
+
+[tool.poetry.group.lint]
+optional = true
+[tool.poetry.group.lint.dependencies]
+flake8 = "^6"
+black = "^23"
+pylint = "^3"
+mypy = "^1"
+
+[tool.poetry.group.test]
+optional = true
+[tool.poetry.group.test.dependencies]
+pytest = "^7"
+pytest-cookies = "^0"
+
+[build-system]
+requires = ["poetry-core<2"]
+build-backend = "poetry.core.masonry.api"
