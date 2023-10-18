@@ -21,6 +21,7 @@ optional = true
 [tool.poetry.group.lint.dependencies]
 flake8 = "^6"
 black = "^23"
+isort = "^5"
 pylint = "^3"
 mypy = "^1"
 
@@ -33,3 +34,52 @@ pytest-cookies = "^0"
 [build-system]
 requires = ["poetry-core<2"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 79
+
+[tool.isort]
+ensure_newline_before_comments = true
+include_trailing_comma = true
+line_length = 79
+multi_line_output = 3
+split_on_trailing_comma = true
+
+[tool.mypy]
+strict = true
+pretty = true
+
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+
+[[tool.mypy.overrides]]
+module = ["pytest_cookies.*"]
+ignore_missing_imports = true
+
+[tool.pylint.BASIC]
+module-rgx = "[a-z_][a-z0-9_]{2,32}$"
+const-rgx = "[a-zA-Z_][a-zA-Z0-9_]{2,32}$"
+class-rgx = "[A-Z_][a-zA-Z0-9]+$"
+function-rgx = "([a-z_][a-z0-9_]{2,32}|(assert|test_|__)[a-z_][a-z0-9_]{2,80})$"
+method-rgx = "([a-z_][a-z0-9_]{2,32}|(assert|test_|__)[a-z_][a-z0-9_]{2,80})$"
+attr-rgx = "[a-z_][a-z0-9_]{2,32}$"
+argument-rgx = "[a-z_][a-z0-9_]{2,32}$"
+variable-rgx = "[a-z_][a-z0-9_]{2,32}$"
+class-attribute-rgx = "([A-Za-z_][A-Za-z0-9_]{2,32}|(__.*__))$"
+inlinevar-rgx = "[A-Za-z_][A-Za-z0-9_]*$"
+
+[tool.pylint."MESSAGES CONTROL"]
+disable = [
+    "missing-docstring",
+    "locally-disabled",
+    "too-few-public-methods",
+    "fixme",
+]
+msg-template = "{module}:{line} [{msg_id}: {symbol}] - {msg}"
+
+[tool.pylint.REPORTS]
+reports = "yes"
+
+[tool.pylint.FORMAT]
+max-line-length = 79
