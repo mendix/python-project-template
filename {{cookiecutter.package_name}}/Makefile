@@ -2,21 +2,19 @@ PACKAGE_NAME := {{cookiecutter.package_name}}
 
 .PHONY: install_lint_requirements
 install_lint_requirements:
-	pip3 install -e .[lint]
+	poetry install --with lint
 
 .PHONY: lint
 lint: install_lint_requirements
 	flake8 $(PACKAGE_NAME) tests
-	black --line-length=79 --check --diff $(PACKAGE_NAME) tests setup.py
-	{%- if cookiecutter.use_pylint == "y" %}
+	black --check --diff $(PACKAGE_NAME) tests
 	pylint $(PACKAGE_NAME) tests
-	{%- endif%}
-	isort --check-only $(PACKAGE_NAME) tests setup.py
+	isort --check-only $(PACKAGE_NAME) tests
 	mypy --ignore-missing-imports $(PACKAGE_NAME) tests
 
 .PHONY: install_test_requirements
 install_test_requirements:
-	pip3 install -e .[test]
+	poetry install --with test
 
 .PHONY: test
 test: install_test_requirements
@@ -38,15 +36,11 @@ clean:
 	find . -regex ".*__pycache__.*" -delete
 	find . -regex "*.py[co]" -delete
 
-.PHONY: install_build_requirements
-install_build_requirements:
-	pip3 install -e .[build]
-
 .PHONY: build
-build: install_build_requirements
-	python3 setup.py sdist bdist_wheel
+build:
+	poetry build
 
 .PHONY: format
 format:
-	black --line-length=79 $(PACKAGE_NAME) tests setup.py
-	isort $(PACKAGE_NAME) tests setup.py
+	black $(PACKAGE_NAME) tests
+	isort $(PACKAGE_NAME) tests

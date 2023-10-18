@@ -9,7 +9,7 @@ calling it as an external process, having to programatically complete the
 project generator wizard.
 """
 import glob
-from collections.abc import Sequence
+from collections.abc import Collection
 
 from pytest_cookies.plugin import Cookies, Result
 
@@ -23,12 +23,10 @@ DEFAULT_PROJECT_NAME = "pymx"
 EXPECTED_PROJECT_FILES = (
     DEFAULT_PROJECT_NAME,
     ".gitignore",
+    "pyproject.toml",
     "README.md",
-    "setup.py",
     "tests",
-    "pylintrc",
-    ".isort.cfg",
-    "mypy.ini",
+    "poetry.lock",
 )
 
 
@@ -38,10 +36,30 @@ def assert_successful_creation(result: Result) -> None:
     assert result.exception is None
 
 
-def assert_expected_files_exist(result: Result, files: Sequence[str]) -> None:
+def assert_expected_files_exist(
+    result: Result,
+    files: Collection[str],
+) -> None:
     created_files = [f.basename for f in result.project.listdir()]
     for fname in files:
         assert fname in created_files
+
+
+def assert_expected_files_do_not_exist(
+    result: Result, files: Collection[str]
+) -> None:
+    with inside_directory_of(result):
+        for cleaned_up in files:
+            for filename in glob.glob("./**", recursive=True):
+                assert cleaned_up not in filename
+
+
+def assert_expected_lines_are_in_output(
+    expected_lines: Collection[str],
+    output: str,
+) -> None:
+    for line in expected_lines:
+        assert line in output
 
 
 def test_default_project_creation(cookies: Cookies) -> None:
@@ -55,48 +73,14 @@ def test_project_creation_with_invalid_name_fails(cookies: Cookies) -> None:
     assert result.exit_code != 0
 
 
-def assert_expected_files_do_not_exist(
-    result: Result, files: Sequence[str]
-) -> None:
-    with inside_directory_of(result):
-        for cleaned_up in files:
-            for filename in glob.glob("./**", recursive=True):
-                assert cleaned_up not in filename
-
-
-EXPECTED_PROJECT_FILES_NO_PYLINT = tuple(
-    file_name
-    for file_name in EXPECTED_PROJECT_FILES
-    if file_name != "pylintrc"
-)
-NO_PLINT = {"use_pylint": "n"}
-
-
-def test_project_creation_without_pylint(cookies: Cookies) -> None:
-    with generate_temporary_project(cookies, extra_context=NO_PLINT) as result:
-        assert_successful_creation(result)
-        assert_expected_files_exist(
-            result, files=EXPECTED_PROJECT_FILES_NO_PYLINT
-        )
-        assert_expected_files_do_not_exist(result, files=("pylintrc",))
-
-
-def assert_expected_lines_are_in_output(
-    expected_lines: Sequence[str],
-    output: str,
-) -> None:
-    for line in expected_lines:
-        assert line in output
-
-
-FILES_TO_CHECK_FORMAT = f"{DEFAULT_PROJECT_NAME} tests setup.py"
-BLACK_OUTPUT = f"black --line-length=79 --check --diff {FILES_TO_CHECK_FORMAT}"
+FILES_TO_CHECK_FORMAT = f"{DEFAULT_PROJECT_NAME} tests"
+BLACK_OUTPUT = f"black --check --diff {FILES_TO_CHECK_FORMAT}"
 PYLINT_OUTPUT_1 = f"pylint {DEFAULT_PROJECT_NAME} tests"
 PYLINT_OUTPUT_2 = "Your code has been rated at 10.00/10"
-ISORT_OUTPUT = f"isort --check-only {DEFAULT_PROJECT_NAME} tests setup.py"
-MYPY_OUTPUT = f"mypy --ignore-missing-imports {DEFAULT_PROJECT_NAME} tests"
+ISORT_OUTPUT = f"isort --check-only {FILES_TO_CHECK_FORMAT}"
+MYPY_OUTPUT = f"mypy --ignore-missing-imports {FILES_TO_CHECK_FORMAT}"
 EXPECTED_LINT_OUTPUT = (
-    "pip3 install -e .[lint]",
+    "poetry install --with lint",
     f"flake8 {DEFAULT_PROJECT_NAME} tests",
     "files would be left unchanged",
     BLACK_OUTPUT,
@@ -113,15 +97,8 @@ def test_linting(cookies: Cookies) -> None:
         assert_expected_lines_are_in_output(EXPECTED_LINT_OUTPUT, output)
 
 
-def test_linting_without_pylint(cookies: Cookies) -> None:
-    with generate_temporary_project(cookies, extra_context=NO_PLINT) as result:
-        output = check_output_in_result_dir("make lint", result)
-        assert PYLINT_OUTPUT_1 not in output
-        assert PYLINT_OUTPUT_2 not in output
-
-
 EXPECTED_TEST_OUTPUT = (
-    "pip3 install -e .[test]",
+    "poetry install --with test",
     "test session starts",
     "files skipped due to complete coverage.",
 )
@@ -167,9 +144,9 @@ def test_clean_can_be_executed_in_empty_project_dir(cookies: Cookies) -> None:
 
 
 EXPECTED_FORMAT_OUTPUT = (
-    f"black --line-length=79 {DEFAULT_PROJECT_NAME} tests setup.py",
+    f"black {FILES_TO_CHECK_FORMAT}",
     "files left unchanged",
-    f"isort {DEFAULT_PROJECT_NAME} tests setup.py",
+    f"isort {FILES_TO_CHECK_FORMAT}",
 )
 
 
