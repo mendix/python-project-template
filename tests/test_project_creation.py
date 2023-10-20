@@ -78,7 +78,7 @@ BLACK_OUTPUT = f"black --check --diff {FILES_TO_CHECK_FORMAT}"
 PYLINT_OUTPUT_1 = f"pylint {DEFAULT_PROJECT_NAME} tests"
 PYLINT_OUTPUT_2 = "Your code has been rated at 10.00/10"
 ISORT_OUTPUT = f"isort --check-only {FILES_TO_CHECK_FORMAT}"
-MYPY_OUTPUT = f"mypy --ignore-missing-imports {FILES_TO_CHECK_FORMAT}"
+MYPY_OUTPUT = f"mypy {FILES_TO_CHECK_FORMAT}"
 EXPECTED_LINT_OUTPUT = (
     "poetry install --with lint",
     f"flake8 {DEFAULT_PROJECT_NAME} tests",

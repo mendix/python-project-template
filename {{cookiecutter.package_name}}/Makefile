@@ -1,28 +1,38 @@
+POETRY ?= poetry
+PYTEST ?= poetry run pytest
+FLAKE8 ?= poetry run flake8
+BLACK  ?= poetry run black
+PYLINT ?= poetry run pylint
+ISORT  ?= poetry run isort
+MYPY   ?= poetry run mypy
+
 PACKAGE_NAME := {{cookiecutter.package_name}}
+TESTS_DIR    := tests
+ALL_SOURCE   := $(PACKAGE_NAME) $(TESTS_DIR)
 
 .PHONY: install_lint_requirements
 install_lint_requirements:
-	poetry install --with lint
+	$(POETRY) install --with lint
 
 .PHONY: lint
 lint: install_lint_requirements
-	flake8 $(PACKAGE_NAME) tests
-	black --check --diff $(PACKAGE_NAME) tests
-	pylint $(PACKAGE_NAME) tests
-	isort --check-only $(PACKAGE_NAME) tests
-	mypy --ignore-missing-imports $(PACKAGE_NAME) tests
+	$(FLAKE8) $(ALL_SOURCE)
+	$(BLACK) --check --diff $(ALL_SOURCE)
+	$(PYLINT) $(ALL_SOURCE)
+	$(ISORT) --check-only $(ALL_SOURCE)
+	$(MYPY) $(ALL_SOURCE)
 
 .PHONY: install_test_requirements
 install_test_requirements:
-	poetry install --with test
+	$(POETRY) install --with test
 
 .PHONY: test
 test: install_test_requirements
-	pytest \
+	$(PYTEST) $(PYTEST_OPTS) \
 		--cov=$(PACKAGE_NAME) \
-		--cov=tests \
+		--cov=$(TESTS_DIR) \
 		--cov-report=term-missing:skip-covered \
-		tests
+		$(TESTS_DIR)
 
 .PHONY: clean
 clean:
@@ -38,9 +48,9 @@ clean:
 
 .PHONY: build
 build:
-	poetry build
+	$(POETRY) build
 
 .PHONY: format
 format:
-	black $(PACKAGE_NAME) tests
-	isort $(PACKAGE_NAME) tests
+	$(BLACK) $(ALL_SOURCE)
+	$(ISORT) $(ALL_SOURCE)
