@@ -7,6 +7,7 @@ lint: install_lint_requirements
 	flake8 tests
 	black --line-length=79 --check --diff tests
 	pylint tests
+	isort --check-only tests setup.py
 	mypy tests
 
 .PHONY: install_test_requirements
@@ -30,6 +31,7 @@ clean:
 .PHONY: format
 format:
 	black --line-length=79 tests
+	isort tests setup.py
 
 .PHONY: install
 install:

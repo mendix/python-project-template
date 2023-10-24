@@ -11,9 +11,8 @@ lint: install_lint_requirements
 	{%- if cookiecutter.use_pylint == "y" %}
 	pylint $(PACKAGE_NAME) tests
 	{%- endif%}
-	{%- if cookiecutter.use_mypy == "y" %}
-	mypy --ignore-missing-imports $(PACKAGE_NAME)
-	{%- endif%}
+	isort --check-only $(PACKAGE_NAME) tests setup.py
+	mypy --ignore-missing-imports $(PACKAGE_NAME) tests
 
 .PHONY: install_test_requirements
 install_test_requirements:
@@ -50,3 +49,4 @@ build: install_build_requirements
 .PHONY: format
 format:
 	black --line-length=79 $(PACKAGE_NAME) tests setup.py
+	isort $(PACKAGE_NAME) tests setup.py

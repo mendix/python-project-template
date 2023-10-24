@@ -1,2 +1,2 @@
-def dummy() -> None:
-    pass
+def dummy() -> bool:
+    return True
