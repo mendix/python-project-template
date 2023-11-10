@@ -13,7 +13,7 @@ classifiers = [
 authors = ["Mendix Cloud Value Added Services Team <dis_valueaddedservices@mendix.com>"]
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.12"
+python = ">=3.10,<3.13"
 cookiecutter = "^2"
 
 [tool.poetry.group.lint]
