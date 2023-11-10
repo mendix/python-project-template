@@ -1,15 +1,14 @@
 # python-project-template
 
-![Test status](https://github.com/matyaskuti/python-project-template/actions/workflows/python-app.yml/badge.svg
-)
+![Test status](https://github.com/matyaskuti/python-project-template/actions/workflows/python-app.yml/badge.svg)
 
 A [`cookiecutter`](https://github.com/audreyr/cookiecutter) based Python
 project template.
 
 This is an opinionated template, based on useful defaults that we like to have
-when creating new projects. We include a pre-built makefile, with rules for
+when creating new projects. We include a pre-built Makefile, with rules for
 linting and test, scaffolded unit tests, and tools for building wheels,
-amongst other things. 
+amongst other things.
 
 This project is open source because we think it might be useful to other
 engineers. However, Mendix does not officially support this project.
@@ -60,61 +59,6 @@ with `git remote add origin <repository URL>`
 generated files to the cloned local repository
 * Then all you have to do is push
 
-## Usage - existing project
-
-Since many times we want to improve existing projects instead of generating a
-new one, this tool can also be used to do so, with some extra manual steps
-along the way.
-
-So in case you wish to migrate an existing Python project to comply with this
-template, do the following steps
-
-1. Clone the existing repository
-2. Make sure you are able to use this project on your machine (see the usage
-for a new project above: clone/install cookiecutter)
-3. Generate a new empty project, with the same name as your existing one
-(this is an important step, since later you don't want to manually modify the
-``Makefile`` and ``setup.py`` too much)
-4. From the generated project, move the following files, as-is to your existing
-local repository
-    * ``.gitignore`` (just to be sure, diff it in case your project contains
-    more ignored patterns than the new one)
-    * ``Makefile``
-    * ``pylintrc`` (if applicable)
-    * ``tests`` (if it doesn't exist yet)
-5. Rename the existing ``setup.py`` to ``setup.py.bak``
-6. Move the generated ``setup.py`` to the existing local repository
-7. Merge ``setup.py.bak`` into ``setup.py``
-    * Move entry points
-    * Change description if needed
-    * Adjust the `packages` parameter of the `setup(...)` call if needed,
-    although `find_packages()` should suffice in 99% of cases
-    * Update the `install_requires` parameter with the requirements of the
-    existing package
-    * Create a ``metadata.py`` within the new project's main Python package and
-    make sure the version is correct (`VERSION` and `__version__` parameters)
-    * Make sure you don't lose any extras that are in the setup file, such as
-    extra package data, reference to ``MANIFEST.in``, etc.
-8. Remove ``setup.py.bak``
-9. Remove ``tests/test_dummy.py`` and make there is at least one test to be run
-10. Do a sanity check on the make targets
-    * format
-    * lint
-    * test
-    * build
-    * clean
-11. Make sure tests and linting are green - it could be that making linting
-pass requires a bit of manual work in the code
-    * `flake8`, `pylint`, `black` errors should be easy to fix or explicitly
-    ignore (note that `pylint` errors/warnings that cannot be immediately fixed
-    are usually caused by some deeper design smell in the code, maybe just
-    ignore these at first and come back to fixing them later)
-    * `mypy` can break if some dependencies are not implementing type hinting
-    in this case check out the
-    [documentation](https://mypy.readthedocs.io/en/latest/running_mypy.html#missing-imports)
-    to explicitly ignore import problems related to this
-12. Remove the newly generated project
-
 ## About the contents of this repository
 
 This project makes use of the following tools (similarly to the generated
@@ -159,10 +103,10 @@ Below are the main `make` targets and the tools used within:
     still leaves a lot of flexibility and there are as many preferences as
     developers, we use this tool because it is already opinionated so you don't
     have to be
+    * `isort` - linter and formatter specialized for imports
     * `pylint` - linting, error and duplication detection and very much
-    customizable; the generated project contains a minimal, but decent
-    `pylintrc` configuration file; its usage is optional, can be decided upon
-    project generation, however highly recommended and turned on by default
+    customizable; the generated project contains a minimal, but decent set of
+    configuration
     * `mypy` - type checker, the de facto standard at the moment
 * `format` - to easily comply with the above standards at the push of a button
     * `black` - because of the reasons mentioned above
@@ -177,19 +121,27 @@ reports, etc.
 * `build` - to create a standard, distributable Python package
     * `wheel` - this is the current standard for creating distributables
 
-_Note: the targets `lint`, `test` and `build` have a corresponding
+_Note: the targets `lint` and `test` have a corresponding
 `install_<target>_requirements` target to install extra dependencies. These are
-individually defined in the generated project's `setup.py` as well as extra
-requirements. There is no need to call the install targets on their own, they
-are called automatically in their related main target._
+individually defined in the generated project's `pyproject.toml` as well as
+extra requirements. There is no need to call the install targets on their own,
+they are called automatically in their related main target._
+
+### Dependency and package management
+
+Now the project uses [Poetry](https://python-poetry.org/) as the package and
+dependency management tool, with a single ``pyproject.toml`` file for the
+package and tooling configuration. To install this project template and
+generate a new Python package, Poetry is not needed, basic installation (ie.
+the `make install` target, also invoked by `make generate`) uses `pip`.
 
 ### Future extension
 
 New linters can be easily added by extending the `Makefile`, potentially made
-optional (just as with `pylint`).
+optional.
 
 Currently in the created project there is only one `test` target which is
-intendet to be used to run a set of automated tests in the "commit phase".
+intended to be used to run a set of automated tests in the "commit phase".
 However eventually there should be more testing targets created, thus
 separating different levels of automated tests, such as
 * Integration tests (`test-integration`) - automatically verifying the
