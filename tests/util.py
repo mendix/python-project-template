@@ -16,7 +16,7 @@ def generate_temporary_project(
         result = cookies.bake(**kwargs)
         yield result
     finally:
-        shutil.rmtree(str(result.project))
+        shutil.rmtree(str(result.project), ignore_errors=True)
 
 
 @contextlib.contextmanager

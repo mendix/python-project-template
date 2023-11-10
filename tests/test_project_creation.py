@@ -9,8 +9,10 @@ calling it as an external process, having to programatically complete the
 project generator wizard.
 """
 import abc
+import contextlib
 import glob
 from collections.abc import Collection
+from typing import Iterator
 
 from pytest_cookies.plugin import Cookies, Result
 
@@ -147,8 +149,84 @@ class Context(abc.ABC):
     def build_patterns(self) -> tuple[str, ...]:
         return ("./dist/*.tar.gz", "./dist/*.whl")
 
+    @property
+    def context(self) -> dict[str, str]:
+        return {}
 
-class TestPoetryProjectCreation(Context):
+
+class BaseTest(Context):
+    @contextlib.contextmanager
+    def project(
+        self,
+        cookies: Cookies,
+        context: dict[str, str] | None = None,
+    ) -> Iterator[Result]:
+        all_context = self.context
+        if context is not None:
+            all_context |= context
+
+        with generate_temporary_project(
+            cookies, extra_context=all_context
+        ) as result:
+            yield result
+
+    def test_project_creation(self, cookies: Cookies) -> None:
+        with self.project(cookies) as result:
+            assert_successful_creation(result)
+            assert_expected_files_exist(result, files=self.project_files)
+            assert_project_file_contains(
+                result, "pyproject.toml", self.pyproject_toml_lines
+            )
+
+    def test_project_creation_with_invalid_name_fails(
+        self,
+        cookies: Cookies,
+    ) -> None:
+        with self.project(
+            cookies, context={"package_name": "Foo-Bar"}
+        ) as result:
+            assert result.exit_code != 0
+
+    def test_linting(self, cookies: Cookies) -> None:
+        with self.project(cookies) as result:
+            output = check_output_in_result_dir("make lint", result)
+            assert_expected_lines_are_in_output(self.lint_output, output)
+
+    def test_test_run(self, cookies: Cookies) -> None:
+        with self.project(cookies) as result:
+            output = check_output_in_result_dir("make test", result)
+            assert_expected_lines_are_in_output(self.test_output, output)
+
+    def test_cleaning(self, cookies: Cookies) -> None:
+        with self.project(cookies) as result:
+            check_output_in_result_dir("make lint", result)
+            check_output_in_result_dir("make test", result)
+            check_output_in_result_dir("make build", result)
+            check_output_in_result_dir("make clean", result)
+
+            assert_expected_files_do_not_exist(
+                result,
+                files=self.cleaned_up_file_parts,
+            )
+
+    def test_clean_in_empty_project_dir(self, cookies: Cookies) -> None:
+        with self.project(cookies) as result:
+            check_output_in_result_dir("make clean", result)
+
+    def test_formatting(self, cookies: Cookies) -> None:
+        with self.project(cookies) as result:
+            output = check_output_in_result_dir("make format", result)
+            assert_expected_lines_are_in_output(self.format_output, output)
+
+    def test_build(self, cookies: Cookies) -> None:
+        with self.project(cookies) as result:
+            check_output_in_result_dir("make build", result)
+            with inside_directory_of(result):
+                for pattern in self.build_patterns:
+                    assert glob.glob(pattern)
+
+
+class TestPoetryProjectCreation(BaseTest):
     @property
     def pyproject_toml_lines(self) -> tuple[str, ...]:
         return ("[tool.poetry]",)
@@ -163,56 +241,3 @@ class TestPoetryProjectCreation(Context):
 
     def install(self, extra: str) -> str:
         return f"poetry install --with {extra}"
-
-    def test_project_creation(self, cookies: Cookies) -> None:
-        with generate_temporary_project(cookies) as result:
-            assert_successful_creation(result)
-            assert_expected_files_exist(result, files=self.project_files)
-            assert_project_file_contains(
-                result, "pyproject.toml", self.pyproject_toml_lines
-            )
-
-    def test_project_creation_with_invalid_name_fails(
-        self,
-        cookies: Cookies,
-    ) -> None:
-        result = cookies.bake(extra_context={"package_name": "Foo-Bar"})
-        assert result.exit_code != 0
-
-    def test_linting(self, cookies: Cookies) -> None:
-        with generate_temporary_project(cookies) as result:
-            output = check_output_in_result_dir("make lint", result)
-            assert_expected_lines_are_in_output(self.lint_output, output)
-
-    def test_test_run(self, cookies: Cookies) -> None:
-        with generate_temporary_project(cookies) as result:
-            output = check_output_in_result_dir("make test", result)
-            assert_expected_lines_are_in_output(self.test_output, output)
-
-    def test_cleaning(self, cookies: Cookies) -> None:
-        with generate_temporary_project(cookies) as result:
-            check_output_in_result_dir("make lint", result)
-            check_output_in_result_dir("make test", result)
-            check_output_in_result_dir("make build", result)
-            check_output_in_result_dir("make clean", result)
-
-            assert_expected_files_do_not_exist(
-                result,
-                files=self.cleaned_up_file_parts,
-            )
-
-    def test_clean_in_empty_project_dir(self, cookies: Cookies) -> None:
-        with generate_temporary_project(cookies) as result:
-            check_output_in_result_dir("make clean", result)
-
-    def test_formatting(self, cookies: Cookies) -> None:
-        with generate_temporary_project(cookies) as result:
-            output = check_output_in_result_dir("make format", result)
-            assert_expected_lines_are_in_output(self.format_output, output)
-
-    def test_build(self, cookies: Cookies) -> None:
-        with generate_temporary_project(cookies) as result:
-            check_output_in_result_dir("make build", result)
-            with inside_directory_of(result):
-                for pattern in self.build_patterns:
-                    assert glob.glob(pattern)
