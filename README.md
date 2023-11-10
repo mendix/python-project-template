@@ -1,6 +1,7 @@
 # python-project-template
 
 ![Test status](https://github.com/matyaskuti/python-project-template/actions/workflows/python-app.yml/badge.svg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A [`cookiecutter`](https://github.com/audreyr/cookiecutter) based Python
 project template.
