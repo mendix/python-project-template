@@ -43,7 +43,7 @@ clean:
 	find . -regex "*.py[co]" -delete
 
 .PHONY: format
-format:
+format: install_lint_requirements
 	$(BLACK) $(TESTS_DIR)
 	$(ISORT) $(TESTS_DIR)
 

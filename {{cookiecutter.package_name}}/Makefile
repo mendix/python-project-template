@@ -51,6 +51,6 @@ build:
 	$(POETRY) build
 
 .PHONY: format
-format:
+format: install_lint_requirements
 	$(BLACK) $(ALL_SOURCE)
 	$(ISORT) $(ALL_SOURCE)

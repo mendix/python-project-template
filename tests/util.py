@@ -10,8 +10,8 @@ from pytest_cookies.plugin import Cookies, Result
 
 @contextlib.contextmanager
 def generate_temporary_project(
-    cookies: Cookies, **kwargs: dict[Any, Any]
-) -> Iterator[Cookies]:
+    cookies: Cookies, **kwargs: dict[str, Any]
+) -> Iterator[Result]:
     try:
         result = cookies.bake(**kwargs)
         yield result
