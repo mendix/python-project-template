@@ -64,9 +64,9 @@ def assert_project_file_contains(
 ) -> None:
     with inside_directory_of(result):
         with open(file_name, encoding="utf-8") as fobj:
-            content: list[str] = fobj.readlines()
+            content: str = fobj.read()
             for line in expected_lines:
-                assert f"{line}\n" in content
+                assert f"{line}" in content
 
 
 class Context(abc.ABC):
@@ -84,6 +84,11 @@ class Context(abc.ABC):
         ...
 
     @property
+    @abc.abstractmethod
+    def file_lines(self) -> dict[str, tuple[str, ...]]:
+        ...
+
+    @property
     def project_files(self) -> tuple[str, ...]:
         return (
             DEFAULT_PROJECT_NAME,
@@ -94,12 +99,7 @@ class Context(abc.ABC):
         ) + self.extra_files
 
     @property
-    @abc.abstractmethod
-    def pyproject_toml_lines(self) -> tuple[str, ...]:
-        ...
-
-    @property
-    def lint_output(self) -> tuple[str, ...]:  # TODO
+    def lint_output(self) -> tuple[str, ...]:
         return (
             self.install("lint"),
             f"{self.runner}flake8 {DEFAULT_PROJECT_NAME} tests",
@@ -137,7 +137,7 @@ class Context(abc.ABC):
         )
 
     @property
-    def format_output(self) -> tuple[str, ...]:  # TODO
+    def format_output(self) -> tuple[str, ...]:
         return (
             self.install("lint"),
             f"{self.runner}black {ALL_SOURCE}",
@@ -174,9 +174,8 @@ class BaseTest(Context):
         with self.project(cookies) as result:
             assert_successful_creation(result)
             assert_expected_files_exist(result, files=self.project_files)
-            assert_project_file_contains(
-                result, "pyproject.toml", self.pyproject_toml_lines
-            )
+            for filename, lines in self.file_lines.items():
+                assert_project_file_contains(result, filename, lines)
 
     def test_project_creation_with_invalid_name_fails(
         self,
@@ -228,8 +227,17 @@ class BaseTest(Context):
 
 class TestPoetryProjectCreation(BaseTest):
     @property
-    def pyproject_toml_lines(self) -> tuple[str, ...]:
-        return ("[tool.poetry]",)
+    def file_lines(self) -> dict[str, tuple[str, ...]]:
+        return {
+            "pyproject.toml": (
+                "[tool.poetry]",
+                'build-backend = "poetry.core.masonry.api"',
+            ),
+            "Makefile": (
+                "$(POETRY) run",
+                "$(POETRY) install",
+            ),
+        }
 
     @property
     def extra_files(self) -> tuple[str, ...]:
@@ -241,3 +249,26 @@ class TestPoetryProjectCreation(BaseTest):
 
     def install(self, extra: str) -> str:
         return f"poetry install --with {extra}"
+
+
+class TestSetuptoolsProjectCreation(BaseTest):
+    @property
+    def context(self) -> dict[str, str]:
+        return {"build_system": "setuptools"}
+
+    @property
+    def file_lines(self) -> dict[str, tuple[str, ...]]:
+        return {
+            "pyproject.toml": (
+                "[project]",
+                'build-backend = "setuptools.build_meta"',
+            ),
+            "Makefile": ("$(PIP) install",),
+        }
+
+    @property
+    def runner(self) -> str:
+        return ""
+
+    def install(self, extra: str) -> str:
+        return f"pip3 install -e .[{extra}]"

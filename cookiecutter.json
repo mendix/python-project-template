@@ -2,5 +2,6 @@
     "package_name": "pymx",
     "short_description": "Python project",
     "author_name": "Mendix Cloud Value Added Services Team",
-    "author_email": "dis_valueaddedservices@mendix.com"
+    "author_email": "dis_valueaddedservices@mendix.com",
+    "build_system": "poetry"
 }

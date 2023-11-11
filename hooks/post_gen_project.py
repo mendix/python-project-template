@@ -9,5 +9,5 @@ if __name__ == "__main__":
     #     os.remove(os.path.join(PROJECT_DIRECTORY, "sometoolrc"))
     # The above couple lines are left as an example for the future.
 
-    # Generate the Poetry lockfile
-    subprocess.call(["poetry", "lock"], stderr=subprocess.STDOUT)
+    if "{{ cookiecutter.build_system }}" == "poetry":
+        subprocess.call(["poetry", "lock"], stderr=subprocess.STDOUT)

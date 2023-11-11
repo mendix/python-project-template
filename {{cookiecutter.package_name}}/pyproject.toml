@@ -1,3 +1,4 @@
+{%- if cookiecutter.build_system == "poetry" -%}
 [tool.poetry]
 name = "{{cookiecutter.package_name}}"
 version = "0.1.0"
@@ -32,6 +33,45 @@ pytest-cov = "^4"
 [build-system]
 requires = ["poetry-core<2"]
 build-backend = "poetry.core.masonry.api"
+{%- else -%}
+[project]
+name = "{{cookiecutter.package_name}}"
+version = "0.1.0"
+description = "{{cookiecutter.short_description}}"
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Framework :: Pytest",
+    "Typing :: Typed",
+]
+authors = [
+    {name = "{{cookiecutter.author_name}}", email = "{{cookiecutter.author_email}}"},
+]
+
+requires-python = ">=3.10"
+
+dependencies = []
+
+[project.optional-dependencies]
+lint = [
+    "flake8>=6",
+    "black>=23",
+    "isort>=5",
+    "pylint>=3",
+    "mypy>=1",
+]
+test = [
+    "pytest>=7",
+    "pytest-cov>=4",
+]
+build = [
+    "build<2",
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+{%- endif %}
 
 [tool.black]
 line-length = 79
