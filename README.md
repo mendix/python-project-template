@@ -22,8 +22,8 @@ This project is licensed under the MIT license.
 
 In the below sections it is explained how to generate a new Python package with
 this project. When generating a new package, the tool will request a series of
-inputs, such as the package name, description, author, whether to include
-certain tooling, etc.
+inputs, such as the package name, description, author, tooling such as
+package management, etc.
 
 ### By cloning this repo
 
@@ -41,7 +41,7 @@ be installed automatically._
 2. Run `cookiecutter <repository URL>`
 
 To see what options `cookiecutter` offers (eg. output/target directory,
-verbosit, etc.), run `cookiecutter --help`.
+verbosity, etc.), run `cookiecutter --help`.
 
 ### Remove clutter
 
@@ -49,22 +49,12 @@ In order to be able to test that the package is generated correctly and linting
 and tests can be run, there is a `dummy.py` and a corresponding `test_dummy.py`
 file generated. This is exactly what the name suggests and should be removed.
 
-### Pushing to Git
-
-Make sure you have created a new repository in GitLab/GitHub/etc. already.
-
-After having the desired package generated you can
-* Run `git init` in the new project root and add the existing remote repository
-with `git remote add origin <repository URL>`
-* Or if you have the empty repository already cloned on your machine, copy the
-generated files to the cloned local repository
-* Then all you have to do is push
-
 ## About the contents of this repository
 
 This project makes use of the following tools (similarly to the generated
 Python package - see below):
 * `make`
+* `poetry`
 * `cookiecutter`
 * `pytest`
 * `pytest-cookies`
@@ -85,9 +75,15 @@ correct
 values of project parameters
 
 In order to easily test proper generation of a Python project, a `pytest`
-plugin, `pytest-cookies` is used. This provides a `cookies` fixture, which is
-injected into the test cases during runtime, making it really easy to test-run
-the `cookiecutter` template in an auto-generated location.
+plugin, [`pytest-cookies`](https://github.com/hackebrot/pytest-cookies) is
+used. This provides a `cookies` fixture, which is injected into the test cases
+during runtime, making it really easy to test-run the `cookiecutter` template
+in an auto-generated location.
+
+While the project uses [Poetry](https://python-poetry.org/) as a package
+manager, to install and use it (ie. to run `make generate`), does not require
+Poetry, only Pip (which is assumed to be part of most standard Python
+installations). Only contributing requires Poetry.
 
 ## About the generated Python project
 
@@ -124,39 +120,19 @@ reports, etc.
 
 _Note: the targets `lint` and `test` have a corresponding
 `install_<target>_requirements` target to install extra dependencies. These are
-individually defined in the generated project's `pyproject.toml` as well as
+individually defined in the generated project's `pyproject.toml` as well, as
 extra requirements. There is no need to call the install targets on their own,
 they are called automatically in their related main target._
 
 ### Dependency and package management
 
-Now the project uses [Poetry](https://python-poetry.org/) as the package and
-dependency management tool, with a single ``pyproject.toml`` file for the
-package and tooling configuration. To install this project template and
-generate a new Python package, Poetry is not needed, basic installation (ie.
-the `make install` target, also invoked by `make generate`) uses `pip`.
+A single ``pyproject.toml`` file is used for the generated project's
+definition, packaging and tooling configuration.
+When generating the project, the `build_system` parameter decides whether the
+created Python package use [Poetry](https://python-poetry.org/) or
+[Setuptools](https://setuptools.pypa.io/) for dependency management and as a
+build backend: it defaults to Poetry, if any other value is provided then
+Setuptools will be used.
 
-### Future extension
-
-New linters can be easily added by extending the `Makefile`, potentially made
-optional.
-
-Currently in the created project there is only one `test` target which is
-intended to be used to run a set of automated tests in the "commit phase".
-However eventually there should be more testing targets created, thus
-separating different levels of automated tests, such as
-* Integration tests (`test-integration`) - automatically verifying the
-application is piped correctly to other system components
-* Acceptance tests (`test-acceptance` target) - automatically verifying
-functional and non-functional requirements, potentially in a BDD style
-* Capacity tests (`test-capacity` target) - automatically verifying that an
-application is able to handle load according to requirements
-* Security (`security` target), to run some automated security tooling
-(eg. Snyk or BlackDuck) to reveal potential vurnelabilities in the application
-code itself or introduced by dependencies
-
-In addition to this we could introduce automated documentation generation in
-the created project, using [Sphinx](http://www.sphinx-doc.org/en/master/) via
-a `make docs` target. For this we will need some storage to be able to host the
-generated docs and push to it from Python projects upon a successful master
-build.
+Picking either will be reflected in the ``pyproject.toml`` and the
+``Makefile``.
