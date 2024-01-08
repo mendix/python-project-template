@@ -24,7 +24,7 @@ setup(
     install_requires=["cookiecutter>2.1.1,<3"],
     extras_require={
         "lint": [
-            "flake8<7",
+            "flake8<8",
             "black<24",
             "pylint<4",
             "mypy<2"
