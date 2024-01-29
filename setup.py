@@ -30,7 +30,7 @@ setup(
             "mypy<2"
         ],
         "test": [
-            "pytest<8",
+            "pytest<9",
             "pytest-cookies<1",
             "pytest-cov<5",
         ],
