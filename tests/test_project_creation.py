@@ -8,55 +8,42 @@ This plugin makes it a lot more convenient to invoke `cookiecutter` than
 calling it as an external process, having to programatically complete the
 project generator wizard.
 """
-import glob
-from collections.abc import Sequence
 
+import abc
+import dataclasses
+import glob
+from collections.abc import Collection
+
+import pytest
 from pytest_cookies.plugin import Cookies, Result
 
 from .util import (
     check_output_in_result_dir,
-    generate_temporary_project,
     inside_directory_of,
 )
 
 DEFAULT_PROJECT_NAME = "pymx"
-EXPECTED_PROJECT_FILES = (
-    DEFAULT_PROJECT_NAME,
-    ".gitignore",
-    "README.md",
-    "setup.py",
-    "tests",
-    "pylintrc",
-    ".isort.cfg",
-    "mypy.ini",
-)
+ALL_SOURCE = f"{DEFAULT_PROJECT_NAME} tests"
 
 
 def assert_successful_creation(result: Result) -> None:
-    assert result.project.isdir()
+    assert result.project_path.is_dir()
     assert result.exit_code == 0
     assert result.exception is None
 
 
-def assert_expected_files_exist(result: Result, files: Sequence[str]) -> None:
-    created_files = [f.basename for f in result.project.listdir()]
+def assert_expected_files_exist(
+    result: Result,
+    files: Collection[str],
+) -> None:
+    created_files = [f.name for f in result.project_path.iterdir()]
     for fname in files:
         assert fname in created_files
 
 
-def test_default_project_creation(cookies: Cookies) -> None:
-    with generate_temporary_project(cookies) as result:
-        assert_successful_creation(result)
-        assert_expected_files_exist(result, files=EXPECTED_PROJECT_FILES)
-
-
-def test_project_creation_with_invalid_name_fails(cookies: Cookies) -> None:
-    result = cookies.bake(extra_context={"package_name": "Foo-Bar"})
-    assert result.exit_code != 0
-
-
 def assert_expected_files_do_not_exist(
-    result: Result, files: Sequence[str]
+    result: Result,
+    files: Collection[str],
 ) -> None:
     with inside_directory_of(result):
         for cleaned_up in files:
@@ -64,127 +51,256 @@ def assert_expected_files_do_not_exist(
                 assert cleaned_up not in filename
 
 
-EXPECTED_PROJECT_FILES_NO_PYLINT = tuple(
-    file_name
-    for file_name in EXPECTED_PROJECT_FILES
-    if file_name != "pylintrc"
-)
-NO_PLINT = {"use_pylint": "n"}
-
-
-def test_project_creation_without_pylint(cookies: Cookies) -> None:
-    with generate_temporary_project(cookies, extra_context=NO_PLINT) as result:
-        assert_successful_creation(result)
-        assert_expected_files_exist(
-            result, files=EXPECTED_PROJECT_FILES_NO_PYLINT
-        )
-        assert_expected_files_do_not_exist(result, files=("pylintrc",))
-
-
 def assert_expected_lines_are_in_output(
-    expected_lines: Sequence[str],
+    expected_lines: Collection[str],
     output: str,
 ) -> None:
     for line in expected_lines:
         assert line in output
 
 
-FILES_TO_CHECK_FORMAT = f"{DEFAULT_PROJECT_NAME} tests setup.py"
-BLACK_OUTPUT = f"black --line-length=79 --check --diff {FILES_TO_CHECK_FORMAT}"
-PYLINT_OUTPUT_1 = f"pylint {DEFAULT_PROJECT_NAME} tests"
-PYLINT_OUTPUT_2 = "Your code has been rated at 10.00/10"
-ISORT_OUTPUT = f"isort --check-only {DEFAULT_PROJECT_NAME} tests setup.py"
-MYPY_OUTPUT = f"mypy --ignore-missing-imports {DEFAULT_PROJECT_NAME} tests"
-EXPECTED_LINT_OUTPUT = (
-    "pip3 install -e .[lint]",
-    f"flake8 {DEFAULT_PROJECT_NAME} tests",
-    "files would be left unchanged",
-    BLACK_OUTPUT,
-    PYLINT_OUTPUT_1,
-    PYLINT_OUTPUT_2,
-    ISORT_OUTPUT,
-    MYPY_OUTPUT,
-)
+def assert_project_file_contains(
+    result: Result, file_name: str, expected_lines: Collection[str]
+) -> None:
+    with inside_directory_of(result):
+        with open(file_name, encoding="utf-8") as fobj:
+            content: str = fobj.read()
+            for line in expected_lines:
+                assert f"{line}" in content
 
 
-def test_linting(cookies: Cookies) -> None:
-    with generate_temporary_project(cookies) as result:
-        output = check_output_in_result_dir("make lint", result)
-        assert_expected_lines_are_in_output(EXPECTED_LINT_OUTPUT, output)
+class BaseContext(abc.ABC):
+    @property
+    def extra_files(self) -> tuple[str, ...]:
+        return ()
 
+    @property
+    @abc.abstractmethod
+    def runner(self) -> str: ...
 
-def test_linting_without_pylint(cookies: Cookies) -> None:
-    with generate_temporary_project(cookies, extra_context=NO_PLINT) as result:
-        output = check_output_in_result_dir("make lint", result)
-        assert PYLINT_OUTPUT_1 not in output
-        assert PYLINT_OUTPUT_2 not in output
+    @abc.abstractmethod
+    def install(self, extra: str) -> str: ...
 
+    @property
+    @abc.abstractmethod
+    def file_lines(self) -> dict[str, tuple[str, ...]]: ...
 
-EXPECTED_TEST_OUTPUT = (
-    "pip3 install -e .[test]",
-    "test session starts",
-    "files skipped due to complete coverage.",
-)
+    @property
+    def project_files(self) -> tuple[str, ...]:
+        return (
+            DEFAULT_PROJECT_NAME,
+            ".gitignore",
+            "pyproject.toml",
+            "README.md",
+            "tests",
+        ) + self.extra_files
 
-
-def test_test_run(cookies: Cookies) -> None:
-    with generate_temporary_project(cookies) as result:
-        output = check_output_in_result_dir("make test", result)
-        assert_expected_lines_are_in_output(EXPECTED_TEST_OUTPUT, output)
-
-
-EXPECTED_CLEANED_UP_FILE_PARTS = (
-    ".coverage",
-    ".pytest_cache",
-    ".mypy_cache",
-    f"{DEFAULT_PROJECT_NAME}.egg-info",
-    "pip-wheel-metadata",
-    ".pyc",
-    ".pyo",
-    "__pycache__",
-    "build",
-    "dist",
-    ".tar.gz",
-    ".whl",
-)
-
-
-def test_cleaning(cookies: Cookies) -> None:
-    with generate_temporary_project(cookies) as result:
-        check_output_in_result_dir("make lint", result)
-        check_output_in_result_dir("make test", result)
-        check_output_in_result_dir("make build", result)
-        check_output_in_result_dir("make clean", result)
-
-        assert_expected_files_do_not_exist(
-            result, files=EXPECTED_CLEANED_UP_FILE_PARTS
+    @property
+    def lint_output(self) -> tuple[str, ...]:
+        return (
+            self.install("lint"),
+            f"{self.runner}flake8 {DEFAULT_PROJECT_NAME} tests",
+            "files would be left unchanged",
+            f"{self.runner}black --check --diff {ALL_SOURCE}",
+            f"{self.runner}pylint {DEFAULT_PROJECT_NAME} tests",
+            "Your code has been rated at 10.00/10",
+            f"{self.runner}isort --check-only {ALL_SOURCE}",
+            f"{self.runner}mypy {ALL_SOURCE}",
         )
 
+    @property
+    def test_output(self) -> tuple[str, ...]:
+        return (
+            self.install("test"),
+            "test session starts",
+            "files skipped due to complete coverage.",
+        )
 
-def test_clean_can_be_executed_in_empty_project_dir(cookies: Cookies) -> None:
-    with generate_temporary_project(cookies) as result:
-        check_output_in_result_dir("make clean", result)
+    @property
+    def cleaned_up_file_parts(self) -> tuple[str, ...]:
+        return (
+            ".coverage",
+            ".pytest_cache",
+            ".mypy_cache",
+            f"{DEFAULT_PROJECT_NAME}.egg-info",
+            "pip-wheel-metadata",
+            ".pyc",
+            ".pyo",
+            "__pycache__",
+            "build",
+            "dist",
+            ".tar.gz",
+            ".whl",
+        )
+
+    @property
+    def format_output(self) -> tuple[str, ...]:
+        return (
+            self.install("lint"),
+            f"{self.runner}black {ALL_SOURCE}",
+            "files left unchanged",
+            f"{self.runner}isort {ALL_SOURCE}",
+        )
+
+    @property
+    def build_patterns(self) -> tuple[str, ...]:
+        return ("./dist/*.tar.gz", "./dist/*.whl")
+
+    @property
+    def context(self) -> dict[str, str]:
+        return {}
 
 
-EXPECTED_FORMAT_OUTPUT = (
-    f"black --line-length=79 {DEFAULT_PROJECT_NAME} tests setup.py",
-    "files left unchanged",
-    f"isort {DEFAULT_PROJECT_NAME} tests setup.py",
+class PoetryProjectContext(BaseContext):
+    @property
+    def file_lines(self) -> dict[str, tuple[str, ...]]:
+        return {
+            "pyproject.toml": (
+                "[tool.poetry]",
+                'build-backend = "poetry.core.masonry.api"',
+                # Black
+                "line-length = 79",
+                # Isort
+                "line_length = 79",
+                # Pylint
+                "max-line-length = 79",
+            ),
+            "Makefile": (
+                "$(POETRY) run",
+                "$(POETRY) install",
+            ),
+        }
+
+    @property
+    def extra_files(self) -> tuple[str, ...]:
+        return ("poetry.lock",)
+
+    @property
+    def runner(self) -> str:
+        return "poetry run "
+
+    def install(self, extra: str) -> str:
+        return f"poetry install --with {extra}"
+
+
+class SetupToolsProjectContext(BaseContext):
+    @property
+    def context(self) -> dict[str, str]:
+        return {"build_system": "setuptools"}
+
+    @property
+    def file_lines(self) -> dict[str, tuple[str, ...]]:
+        return {
+            "pyproject.toml": (
+                "[project]",
+                'build-backend = "setuptools.build_meta"',
+                # Black
+                "line-length = 79",
+                # Isort
+                "line_length = 79",
+                # Pylint
+                "max-line-length = 79",
+            ),
+            "Makefile": ("$(PIP) install",),
+        }
+
+    @property
+    def runner(self) -> str:
+        return ""
+
+    def install(self, extra: str) -> str:
+        return f"pip3 install -e .[{extra}]"
+
+
+@dataclasses.dataclass
+class Project:
+    ctx: BaseContext
+    result: Result
+
+
+@pytest.fixture(scope="function", name="project")
+def project_fixture(
+    cookies: Cookies, request: pytest.FixtureRequest
+) -> Project:
+    context: BaseContext = request.param
+    result = cookies.bake(extra_context=context.context)
+    return Project(context, result)
+
+
+@pytest.mark.parametrize(
+    ("context",),
+    (
+        (PoetryProjectContext(),),
+        (SetupToolsProjectContext(),),
+    ),
 )
+class TestFailedProjectCreation:
+    def test_project_creation_with_invalid_name_fails(
+        self,
+        cookies: Cookies,
+        context: BaseContext,
+    ) -> None:
+        extra_context = context.context
+        extra_context |= {"package_name": "Foo-Bar"}
+        result = cookies.bake(extra_context=extra_context)
+        assert result.exit_code != 0
+
+    def test_project_creation_with_invalid_line_length_fails(
+        self,
+        cookies: Cookies,
+        context: BaseContext,
+    ) -> None:
+        extra_context = context.context
+        extra_context |= {"line_length": "78"}
+        result = cookies.bake(extra_context=extra_context)
+        assert result.exit_code != 0
 
 
-def test_formatting(cookies: Cookies) -> None:
-    with generate_temporary_project(cookies) as result:
-        output = check_output_in_result_dir("make format", result)
-        assert_expected_lines_are_in_output(EXPECTED_FORMAT_OUTPUT, output)
+@pytest.mark.parametrize(
+    ("project",),
+    (
+        (PoetryProjectContext(),),
+        (SetupToolsProjectContext(),),
+    ),
+    indirect=True,
+)
+class TestProjectCreation:
+    def test_project_creation(self, project: Project) -> None:
+        assert_successful_creation(project.result)
+        assert_expected_files_exist(
+            project.result, files=project.ctx.project_files
+        )
+        for filename, lines in project.ctx.file_lines.items():
+            assert_project_file_contains(project.result, filename, lines)
 
+    def test_linting(self, project: Project) -> None:
+        output = check_output_in_result_dir("make lint", project.result)
+        assert_expected_lines_are_in_output(project.ctx.lint_output, output)
 
-EXPECTED_BUILD_PATTERNS = ("./dist/*.tar.gz", "./dist/*.whl")
+    def test_test_run(self, project: Project) -> None:
+        output = check_output_in_result_dir("make test", project.result)
+        assert_expected_lines_are_in_output(project.ctx.test_output, output)
 
+    def test_cleaning(self, project: Project) -> None:
+        check_output_in_result_dir("make lint", project.result)
+        check_output_in_result_dir("make test", project.result)
+        check_output_in_result_dir("make build", project.result)
+        check_output_in_result_dir("make clean", project.result)
 
-def test_build(cookies: Cookies) -> None:
-    with generate_temporary_project(cookies) as result:
-        check_output_in_result_dir("make build", result)
-        with inside_directory_of(result):
-            for pattern in EXPECTED_BUILD_PATTERNS:
+        assert_expected_files_do_not_exist(
+            project.result,
+            files=project.ctx.cleaned_up_file_parts,
+        )
+
+    def test_clean_in_empty_project_dir(self, project: Project) -> None:
+        check_output_in_result_dir("make clean", project.result)
+
+    def test_formatting(self, project: Project) -> None:
+        output = check_output_in_result_dir("make format", project.result)
+        assert_expected_lines_are_in_output(project.ctx.format_output, output)
+
+    def test_build(self, project: Project) -> None:
+        check_output_in_result_dir("make build", project.result)
+        with inside_directory_of(project.result):
+            for pattern in project.ctx.build_patterns:
                 assert glob.glob(pattern)

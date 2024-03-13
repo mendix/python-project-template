@@ -3,5 +3,6 @@
     "short_description": "Python project",
     "author_name": "Mendix Cloud Value Added Services Team",
     "author_email": "dis_valueaddedservices@mendix.com",
-    "use_pylint": "y"
+    "build_system": "poetry",
+    "line_length": 79
 }

@@ -1,30 +1,54 @@
+{%- if cookiecutter.build_system == "poetry" -%}
+POETRY ?= poetry
+_RUN   ?= $(POETRY) run
+{% set runner = "$(_RUN) " %}
+{%- else -%}
+PIP    ?= pip3
+PYTHON ?= python3
+{% set runner = "" %}
+{%- endif -%}
+PYTEST ?= {{ runner  }}pytest
+FLAKE8 ?= {{ runner  }}flake8
+BLACK  ?= {{ runner  }}black
+PYLINT ?= {{ runner  }}pylint
+ISORT  ?= {{ runner  }}isort
+MYPY   ?= {{ runner  }}mypy
+
 PACKAGE_NAME := {{cookiecutter.package_name}}
+TESTS_DIR    := tests
+ALL_SOURCE   := $(PACKAGE_NAME) $(TESTS_DIR)
 
 .PHONY: install_lint_requirements
 install_lint_requirements:
-	pip3 install -e .[lint]
+{%- if cookiecutter.build_system == "poetry" %}
+	$(POETRY) install --with lint
+{%- else %}
+	$(PIP) install -e .[lint]
+{%- endif %}
 
 .PHONY: lint
 lint: install_lint_requirements
-	flake8 $(PACKAGE_NAME) tests
-	black --line-length=79 --check --diff $(PACKAGE_NAME) tests setup.py
-	{%- if cookiecutter.use_pylint == "y" %}
-	pylint $(PACKAGE_NAME) tests
-	{%- endif%}
-	isort --check-only $(PACKAGE_NAME) tests setup.py
-	mypy --ignore-missing-imports $(PACKAGE_NAME) tests
+	$(FLAKE8) $(ALL_SOURCE)
+	$(BLACK) --check --diff $(ALL_SOURCE)
+	$(PYLINT) $(ALL_SOURCE)
+	$(ISORT) --check-only $(ALL_SOURCE)
+	$(MYPY) $(ALL_SOURCE)
 
 .PHONY: install_test_requirements
 install_test_requirements:
-	pip3 install -e .[test]
+{%- if cookiecutter.build_system == "poetry" %}
+	$(POETRY) install --with test
+{%- else %}
+	$(PIP) install -e .[test]
+{%- endif %}
 
 .PHONY: test
 test: install_test_requirements
-	pytest \
+	$(PYTEST) $(PYTEST_OPTS) \
 		--cov=$(PACKAGE_NAME) \
-		--cov=tests \
+		--cov=$(TESTS_DIR) \
 		--cov-report=term-missing:skip-covered \
-		tests
+		$(TESTS_DIR)
 
 .PHONY: clean
 clean:
@@ -38,15 +62,16 @@ clean:
 	find . -regex ".*__pycache__.*" -delete
 	find . -regex "*.py[co]" -delete
 
-.PHONY: install_build_requirements
-install_build_requirements:
-	pip3 install -e .[build]
-
 .PHONY: build
-build: install_build_requirements
-	python3 setup.py sdist bdist_wheel
+build:
+{%- if cookiecutter.build_system == "poetry" %}
+	$(POETRY) build
+{%- else %}
+	$(PIP) install -e .[build]
+	$(PYTHON) -m build
+{%- endif %}
 
 .PHONY: format
-format:
-	black --line-length=79 $(PACKAGE_NAME) tests setup.py
-	isort $(PACKAGE_NAME) tests setup.py
+format: install_lint_requirements
+	$(BLACK) $(ALL_SOURCE)
+	$(ISORT) $(ALL_SOURCE)
