@@ -26,7 +26,7 @@ ALL_SOURCE = f"{DEFAULT_PROJECT_NAME} tests"
 
 
 def assert_successful_creation(result: Result) -> None:
-    assert result.project.isdir()
+    assert result.project_path.is_dir()
     assert result.exit_code == 0
     assert result.exception is None
 
@@ -35,7 +35,7 @@ def assert_expected_files_exist(
     result: Result,
     files: Collection[str],
 ) -> None:
-    created_files = [f.basename for f in result.project.listdir()]
+    created_files = [f.name for f in result.project_path.iterdir()]
     for fname in files:
         assert fname in created_files
 

@@ -1,5 +1,6 @@
 import contextlib
 import os
+import pathlib
 import shlex
 import subprocess
 from typing import Iterator
@@ -9,9 +10,12 @@ from pytest_cookies.plugin import Result
 
 @contextlib.contextmanager
 def inside_directory_of(result: Result) -> Iterator[None]:
-    old_dir = result.project.chdir()
-    yield
-    os.chdir(old_dir)
+    old_dir = pathlib.Path.cwd()
+    os.chdir(result.project_path)
+    try:
+        yield
+    finally:
+        os.chdir(old_dir)
 
 
 def check_output_in_result_dir(command: str, result: Result) -> str:
