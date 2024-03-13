@@ -8,6 +8,7 @@ This plugin makes it a lot more convenient to invoke `cookiecutter` than
 calling it as an external process, having to programatically complete the
 project generator wizard.
 """
+
 import abc
 import dataclasses
 import glob
@@ -75,17 +76,14 @@ class BaseContext(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def runner(self) -> str:
-        ...
+    def runner(self) -> str: ...
 
     @abc.abstractmethod
-    def install(self, extra: str) -> str:
-        ...
+    def install(self, extra: str) -> str: ...
 
     @property
     @abc.abstractmethod
-    def file_lines(self) -> dict[str, tuple[str, ...]]:
-        ...
+    def file_lines(self) -> dict[str, tuple[str, ...]]: ...
 
     @property
     def project_files(self) -> tuple[str, ...]:
