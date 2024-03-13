@@ -160,6 +160,12 @@ class PoetryProjectContext(BaseContext):
             "pyproject.toml": (
                 "[tool.poetry]",
                 'build-backend = "poetry.core.masonry.api"',
+                # Black
+                "line-length = 79",
+                # Isort
+                "line_length = 79",
+                # Pylint
+                "max-line-length = 79",
             ),
             "Makefile": (
                 "$(POETRY) run",
@@ -190,6 +196,12 @@ class SetupToolsProjectContext(BaseContext):
             "pyproject.toml": (
                 "[project]",
                 'build-backend = "setuptools.build_meta"',
+                # Black
+                "line-length = 79",
+                # Isort
+                "line_length = 79",
+                # Pylint
+                "max-line-length = 79",
             ),
             "Makefile": ("$(PIP) install",),
         }
@@ -224,14 +236,26 @@ def project_fixture(
         (SetupToolsProjectContext(),),
     ),
 )
-def test_project_creation_with_invalid_name_fails(
-    cookies: Cookies,
-    context: BaseContext,
-) -> None:
-    extra_context = context.context
-    extra_context |= {"package_name": "Foo-Bar"}
-    result = cookies.bake(extra_context=extra_context)
-    assert result.exit_code != 0
+class TestFailedProjectCreation:
+    def test_project_creation_with_invalid_name_fails(
+        self,
+        cookies: Cookies,
+        context: BaseContext,
+    ) -> None:
+        extra_context = context.context
+        extra_context |= {"package_name": "Foo-Bar"}
+        result = cookies.bake(extra_context=extra_context)
+        assert result.exit_code != 0
+
+    def test_project_creation_with_invalid_line_length_fails(
+        self,
+        cookies: Cookies,
+        context: BaseContext,
+    ) -> None:
+        extra_context = context.context
+        extra_context |= {"line_length": "78"}
+        result = cookies.bake(extra_context=extra_context)
+        assert result.exit_code != 0
 
 
 @pytest.mark.parametrize(

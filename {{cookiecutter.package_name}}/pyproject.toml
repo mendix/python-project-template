@@ -74,12 +74,12 @@ build-backend = "setuptools.build_meta"
 {%- endif %}
 
 [tool.black]
-line-length = 79
+line-length = {{ cookiecutter.line_length }}
 
 [tool.isort]
 ensure_newline_before_comments = true
 include_trailing_comma = true
-line_length = 79
+line_length = {{ cookiecutter.line_length }}
 multi_line_output = 3
 split_on_trailing_comma = true
 
@@ -116,7 +116,7 @@ msg-template = "{module}:{line} [{msg_id}: {symbol}] - {msg}"
 reports = "yes"
 
 [tool.pylint.FORMAT]
-max-line-length = 79
+max-line-length = {{ cookiecutter.line_length }}
 
 [tool.pylint.SIMILARITIES]
 min-similarity-lines = 6
