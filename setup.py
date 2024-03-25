@@ -32,7 +32,7 @@ setup(
         "test": [
             "pytest<8",
             "pytest-cookies<1",
-            "pytest-cov<5",
+            "pytest-cov<6",
         ],
     },
     zip_safe=False,
